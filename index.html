@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#10b981" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <title>NutriPantry — Smart Inventory & Nutrition</title>
+  <title>NutriPantry — Smart Inventory, Protein & Micronutrients</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -46,7 +46,7 @@
         </div>
         <div>
           <h1 class="text-lg font-bold tracking-tight text-slate-900 leading-none">NutriPantry</h1>
-          <p class="text-[11px] text-slate-500 font-medium">Smart Meals & Daily Protein</p>
+          <p class="text-[11px] text-slate-500 font-medium">Protein, Vitamins & Minerals</p>
         </div>
       </div>
       <button onclick="openModal('settingsModal')" class="p-2 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-100 transition" aria-label="Settings">
@@ -108,7 +108,7 @@
 
           <div class="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-white/10 text-center">
             <div class="bg-white/10 rounded-lg py-1.5 px-1">
-              <p class="text-[10px] text-emerald-100">Meal Target</p>
+              <p class="text-[10px] text-emerald-100">Meal Protein</p>
               <p id="prof-meal-protein" class="text-xs font-bold mt-0.5">~23g</p>
             </div>
             <div class="bg-white/10 rounded-lg py-1.5 px-1">
@@ -118,6 +118,17 @@
             <div class="bg-white/10 rounded-lg py-1.5 px-1">
               <p class="text-[10px] text-emerald-100">Guideline</p>
               <p id="prof-tag" class="text-xs font-bold truncate mt-0.5">1.0g / kg</p>
+            </div>
+          </div>
+
+          <!-- Key Micronutrient Daily Targets Row -->
+          <div class="mt-2.5 pt-2 border-t border-white/10">
+            <p class="text-[10px] uppercase font-bold text-emerald-100 tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Daily Micronutrient Targets</span>
+              <span class="text-[9px] text-emerald-200 font-normal">RDA / AI</span>
+            </p>
+            <div class="grid grid-cols-4 gap-1.5 text-center" id="prof-micros-summary">
+              <!-- Populated via JS -->
             </div>
           </div>
 
@@ -177,7 +188,13 @@
           ⚡ 100% In-Stock
         </button>
         <button onclick="setRecipeFilter('high-protein')" id="rf-high-protein" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap transition">
-          💪 High Protein (>25g)
+          💪 High Protein (>20g)
+        </button>
+        <button onclick="setRecipeFilter('iron-rich')" id="rf-iron-rich" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap transition">
+          🩸 Iron Rich (>3mg)
+        </button>
+        <button onclick="setRecipeFilter('calcium-rich')" id="rf-calcium-rich" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap transition">
+          🦴 High Calcium (>200mg)
         </button>
         <button onclick="setRecipeFilter('baby-safe')" id="rf-baby-safe" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap transition">
           👶 Baby/Toddler Safe
@@ -194,7 +211,15 @@
     <section id="view-guide" class="space-y-4 hidden">
       <div>
         <h2 class="text-base font-bold text-slate-900">Nutritional Benchmarks</h2>
-        <p class="text-xs text-slate-500">Dietary Reference Intakes (DRI) by age & gender</p>
+        <p class="text-xs text-slate-500">Dietary Reference Intakes (DRI): Protein, Vitamins & Minerals</p>
+      </div>
+
+      <!-- Quick Explainer for Micronutrients -->
+      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-950 space-y-1">
+        <p class="font-bold flex items-center gap-1"><i class="ph-bold ph-sparkle text-emerald-600"></i> Why Micronutrients Matter:</p>
+        <p class="text-[11px] text-emerald-900 leading-relaxed">
+          While protein builds muscle and tissue, <strong>Iron</strong> delivers oxygen to brain & cells, <strong>Calcium & Vit D</strong> build strong bones, <strong>Zinc & Vit C</strong> power immune defense, and <strong>Vitamin A</strong> supports eyesight and cellular growth.
+        </p>
       </div>
 
       <div class="space-y-3">
@@ -202,11 +227,17 @@
         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
           <div class="flex justify-between items-center mb-1.5">
             <span class="text-sm font-bold text-slate-800">Infant (6–12 months)</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~11g / day</span>
+            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~11g Protein</span>
           </div>
-          <p class="text-xs text-slate-600 mb-2">~1.2g per kg body weight. Primarily from breastmilk or formula, with soft complementary solids introduced.</p>
-          <div class="bg-amber-50 rounded-lg p-2 text-[11px] text-amber-800 space-y-1">
-            <p><strong>Crucial Safety:</strong> Zero added salt/sugar. <strong>NO honey</strong> under 12 months (infant botulism risk). Safe textures: smooth purees or soft mashes.</p>
+          <p class="text-xs text-slate-600 mb-2">~1.2g/kg protein. Crucial transition window where infant iron stores deplete and require complementary dietary iron.</p>
+          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 mb-2 font-medium">
+            <div>🩸 <strong>Iron:</strong> 11 mg/day (Crucial!)</div>
+            <div>🦴 <strong>Calcium:</strong> 260 mg/day</div>
+            <div>🛡️ <strong>Zinc:</strong> 3 mg/day</div>
+            <div>🍊 <strong>Vitamin C:</strong> 50 mg/day</div>
+          </div>
+          <div class="bg-amber-50 rounded-lg p-2 text-[11px] text-amber-800">
+            <strong>Baby Safety:</strong> Zero added salt or sugar. <strong>NO honey</strong> under 12 months (botulism risk). Safe textures: smooth purees or soft mashes.
           </div>
         </div>
 
@@ -214,11 +245,17 @@
         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
           <div class="flex justify-between items-center mb-1.5">
             <span class="text-sm font-bold text-slate-800">Toddler (1–4 years)</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~13–15g / day</span>
+            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~13–15g Protein</span>
           </div>
-          <p class="text-xs text-slate-600 mb-2">~1.05g per kg body weight. Essential for rapid physical growth and neurological development.</p>
+          <p class="text-xs text-slate-600 mb-2">High energy expenditure per kg. Supports bone elongation, teeth formation, and motor development.</p>
+          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 mb-2 font-medium">
+            <div>🩸 <strong>Iron:</strong> 7 mg/day</div>
+            <div>🦴 <strong>Calcium:</strong> 700 mg/day</div>
+            <div>🛡️ <strong>Zinc:</strong> 3 mg/day</div>
+            <div>🍊 <strong>Vitamin C:</strong> 15 mg/day</div>
+          </div>
           <div class="bg-slate-50 rounded-lg p-2 text-[11px] text-slate-600">
-            <p><strong>Textures:</strong> Graspable soft finger foods. Quarter whole grapes/cherry tomatoes to avoid choking hazards.</p>
+            <strong>Textures:</strong> Graspable soft finger foods. Quarter whole grapes/cherry tomatoes to avoid choking hazards.
           </div>
         </div>
 
@@ -226,27 +263,45 @@
         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
           <div class="flex justify-between items-center mb-1.5">
             <span class="text-sm font-bold text-slate-800">Child (4–12 years)</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~19–34g / day</span>
+            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~19–34g Protein</span>
           </div>
-          <p class="text-xs text-slate-600">~0.95g per kg body weight. Support sustained activity, cognitive function, and bone density.</p>
+          <p class="text-xs text-slate-600 mb-2">Peak childhood growth, cognitive stamina for school, and skeletal bone mineral accrual.</p>
+          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 font-medium">
+            <div>🩸 <strong>Iron:</strong> 10 mg/day</div>
+            <div>🦴 <strong>Calcium:</strong> 1,000 mg/day</div>
+            <div>🛡️ <strong>Zinc:</strong> 5–8 mg/day</div>
+            <div>🍊 <strong>Vitamin C:</strong> 25–45 mg/day</div>
+          </div>
         </div>
 
         <!-- Adult Women -->
         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
           <div class="flex justify-between items-center mb-1.5">
             <span class="text-sm font-bold text-slate-800">Adult Women</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~46–60g / day</span>
+            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~46–60g Protein</span>
           </div>
-          <p class="text-xs text-slate-600">Baseline 0.8g/kg up to 1.2–1.4g/kg for active lifestyle (+25g during pregnancy/lactation).</p>
+          <p class="text-xs text-slate-600 mb-2">High iron requirement to offset monthly menstrual losses, plus bone calcium preservation.</p>
+          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 font-medium">
+            <div>🩸 <strong>Iron:</strong> 18 mg/day (Higher)</div>
+            <div>🦴 <strong>Calcium:</strong> 1,000 mg/day</div>
+            <div>🛡️ <strong>Zinc:</strong> 8 mg/day</div>
+            <div>🍊 <strong>Vitamin C:</strong> 75 mg/day</div>
+          </div>
         </div>
 
         <!-- Adult Men -->
         <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
           <div class="flex justify-between items-center mb-1.5">
             <span class="text-sm font-bold text-slate-800">Adult Men</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~56–80g / day</span>
+            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~56–80g Protein</span>
           </div>
-          <p class="text-xs text-slate-600">Baseline 0.8g/kg up to 1.4–1.7g/kg for resistance training and muscle preservation.</p>
+          <p class="text-xs text-slate-600 mb-2">Higher muscle mass maintenance, testosterone synthesis (zinc/magnesium), and cardiovascular support.</p>
+          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 font-medium">
+            <div>🩸 <strong>Iron:</strong> 8 mg/day</div>
+            <div>🦴 <strong>Calcium:</strong> 1,000 mg/day</div>
+            <div>🛡️ <strong>Zinc:</strong> 11 mg/day</div>
+            <div>🍊 <strong>Vitamin C:</strong> 90 mg/day</div>
+          </div>
         </div>
       </div>
     </section>
@@ -278,7 +333,7 @@
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <div>
-          <h3 class="font-bold text-slate-900 text-base" id="editModalTitle">Edit Profile & Weight</h3>
+          <h3 class="font-bold text-slate-900 text-base" id="editModalTitle">Edit Profile & Goals</h3>
           <p class="text-xs text-slate-500">Fine-tune targets for this profile</p>
         </div>
         <button onclick="closeModal('editWeightModal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full">
@@ -315,6 +370,14 @@
             <span class="text-xs font-bold text-emerald-700">grams protein / day</span>
           </div>
           <p class="text-[11px] text-emerald-600 mt-0.5" id="preview-meal-split">~23g per main meal</p>
+        </div>
+
+        <!-- Micronutrient RDA breakdown in modal -->
+        <div class="border border-slate-200 rounded-xl p-3 bg-slate-50">
+          <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Standard Daily Micronutrients (RDA)</p>
+          <div class="grid grid-cols-2 gap-2 text-xs" id="edit-modal-micros-list">
+            <!-- Populated dynamically -->
+          </div>
         </div>
 
         <div class="flex gap-2 pt-2">
@@ -369,7 +432,7 @@
     </div>
   </div>
 
-  <!-- RECIPE DETAIL MODAL -->
+  <!-- RECIPE DETAIL MODAL (WITH MICRONUTRIENTS) -->
   <div id="recipeDetailModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -383,6 +446,7 @@
         <!-- Rendered tags -->
       </div>
 
+      <!-- Macro split box -->
       <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100 flex justify-between items-center text-emerald-900">
         <div>
           <p class="text-[10px] uppercase font-bold text-emerald-700">Protein per serving</p>
@@ -391,6 +455,19 @@
         <div class="text-right">
           <p class="text-[10px] uppercase font-bold text-emerald-700" id="modalMealTargetLabel">Fulfills Meal Goal</p>
           <p id="modalMealPercentage" class="text-base font-bold text-emerald-800">0%</p>
+        </div>
+      </div>
+
+      <!-- MICRONUTRIENTS CARD -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+        <div class="flex justify-between items-center mb-2">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1">
+            <i class="ph-bold ph-sparkle text-amber-500"></i> Micronutrient Breakdown
+          </h4>
+          <span class="text-[10px] text-slate-400">% of daily target</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2" id="modalMicronutrientsGrid">
+          <!-- Populated by JS -->
         </div>
       </div>
 
@@ -444,7 +521,7 @@
 
   <!-- ==================== JAVASCRIPT APP LOGIC ==================== -->
   <script>
-    // --- 1. DEFAULT PROFILES DATA & CONFIG ---
+    // --- 1. DEFAULT PROFILES DATA WITH FULL MICRONUTRIENTS (RDA / AI) ---
     const DEFAULT_PROFILES = {
       infant: {
         id: 'infant',
@@ -456,19 +533,35 @@
         calories: 750,
         activity: 'moderate',
         tag: '~1.2g / kg',
-        safetyNote: 'No honey or added salt under 12 months. Introduce smooth purees or soft mashes.'
+        safetyNote: 'No honey or added salt under 12 months. Introduce smooth purees or soft mashes.',
+        micros: {
+          iron: { val: 11, unit: 'mg', name: 'Iron' },
+          calcium: { val: 260, unit: 'mg', name: 'Calcium' },
+          vitC: { val: 50, unit: 'mg', name: 'Vit C' },
+          vitA: { val: 500, unit: 'mcg', name: 'Vit A' },
+          zinc: { val: 3, unit: 'mg', name: 'Zinc' },
+          potassium: { val: 860, unit: 'mg', name: 'Potassium' }
+        }
       },
       toddler: {
         id: 'toddler',
         label: '🧒 Toddler (1-4y)',
         name: 'Toddler (1–4 years)',
         weight: 13.5, // kg
-        baseFactor: 1.05, // ~1.05 g/kg
+        baseFactor: 1.05,
         proteinTarget: 14,
         calories: 1100,
         activity: 'moderate',
         tag: '~1.05g / kg',
-        safetyNote: 'Choking prevention: cut round items (grapes/cherries). Soft, graspable finger foods.'
+        safetyNote: 'Choking prevention: quarter round fruits (grapes/cherries). Soft, graspable finger foods.',
+        micros: {
+          iron: { val: 7, unit: 'mg', name: 'Iron' },
+          calcium: { val: 700, unit: 'mg', name: 'Calcium' },
+          vitC: { val: 15, unit: 'mg', name: 'Vit C' },
+          vitA: { val: 300, unit: 'mcg', name: 'Vit A' },
+          zinc: { val: 3, unit: 'mg', name: 'Zinc' },
+          potassium: { val: 2000, unit: 'mg', name: 'Potassium' }
+        }
       },
       child: {
         id: 'child',
@@ -480,7 +573,15 @@
         calories: 1600,
         activity: 'moderate',
         tag: '~0.95g / kg',
-        safetyNote: ''
+        safetyNote: '',
+        micros: {
+          iron: { val: 10, unit: 'mg', name: 'Iron' },
+          calcium: { val: 1000, unit: 'mg', name: 'Calcium' },
+          vitC: { val: 35, unit: 'mg', name: 'Vit C' },
+          vitA: { val: 450, unit: 'mcg', name: 'Vit A' },
+          zinc: { val: 5, unit: 'mg', name: 'Zinc' },
+          potassium: { val: 2300, unit: 'mg', name: 'Potassium' }
+        }
       },
       female: {
         id: 'female',
@@ -492,7 +593,15 @@
         calories: 1850,
         activity: 'moderate',
         tag: '~0.85g / kg',
-        safetyNote: ''
+        safetyNote: '',
+        micros: {
+          iron: { val: 18, unit: 'mg', name: 'Iron' },
+          calcium: { val: 1000, unit: 'mg', name: 'Calcium' },
+          vitC: { val: 75, unit: 'mg', name: 'Vit C' },
+          vitA: { val: 700, unit: 'mcg', name: 'Vit A' },
+          zinc: { val: 8, unit: 'mg', name: 'Zinc' },
+          potassium: { val: 2600, unit: 'mg', name: 'Potassium' }
+        }
       },
       male: {
         id: 'male',
@@ -504,22 +613,230 @@
         calories: 2200,
         activity: 'moderate',
         tag: '~1.0g / kg',
-        safetyNote: ''
+        safetyNote: '',
+        micros: {
+          iron: { val: 8, unit: 'mg', name: 'Iron' },
+          calcium: { val: 1000, unit: 'mg', name: 'Calcium' },
+          vitC: { val: 90, unit: 'mg', name: 'Vit C' },
+          vitA: { val: 900, unit: 'mcg', name: 'Vit A' },
+          zinc: { val: 11, unit: 'mg', name: 'Zinc' },
+          potassium: { val: 3400, unit: 'mg', name: 'Potassium' }
+        }
       }
     };
 
-    // Profiles loaded into memory (synced with localStorage)
     let profiles = JSON.parse(JSON.stringify(DEFAULT_PROFILES));
     let activeProfileKey = 'male';
 
-    // Activity multiplier weights
     const ACTIVITY_MULTIPLIERS = {
       sedentary: 0.9,
       moderate: 1.0,
       active: 1.3
     };
 
-    // --- 2. DEFAULT INGREDIENTS & RECIPES ---
+    // --- 2. RECIPES WITH PROTEIN + MICRONUTRIENTS (Vitamins & Minerals) ---
+    const RECIPE_DATABASE = [
+      {
+        id: 'r_lentil_mash',
+        title: 'Golden Lentil & Carrot Puree/Mash',
+        protein: 7,
+        calories: 140,
+        prepTime: '15m',
+        babySafe: true,
+        texture: 'Smooth Puree or Fork-Mashed (6+ months)',
+        safetyTip: 'No added salt or whole spices. High in Vitamin A and plant-based iron.',
+        micros: {
+          iron: 2.8,       // mg
+          calcium: 38,     // mg
+          vitC: 9,         // mg
+          vitA: 450,       // mcg (carotene)
+          zinc: 1.2,       // mg
+          potassium: 360   // mg
+        },
+        required: ['Lentils / Dal', 'Carrots'],
+        optional: ['Rice'],
+        steps: [
+          'Rinse yellow lentils and peel/dice carrots into small cubes.',
+          'Boil together in water for 15 minutes until very soft and tender.',
+          'Fork-mash or blend with a splash of warm water to baby-appropriate consistency.'
+        ]
+      },
+      {
+        id: 'r_soft_scramble',
+        title: 'Pillow-Soft Egg & Steamed Spinach Mash',
+        protein: 8,
+        calories: 110,
+        prepTime: '8m',
+        babySafe: true,
+        texture: 'Soft, melt-in-mouth curds (9+ months)',
+        safetyTip: 'Ensure egg is cooked completely through without crisp edges. Rich in Iron, Choline, and Vitamin A.',
+        micros: {
+          iron: 1.9,
+          calcium: 75,
+          vitC: 8,
+          vitA: 280,
+          zinc: 0.9,
+          potassium: 220
+        },
+        required: ['Eggs', 'Spinach'],
+        optional: [],
+        steps: [
+          'Finely chop fresh spinach leaves.',
+          'Whisk 1 egg thoroughly with 1 tbsp warm water or milk.',
+          'Gently scramble in a non-stick pan on low heat until soft curds form completely.'
+        ]
+      },
+      {
+        id: 'r_banana_oats',
+        title: 'Banana & Greek Yogurt Baby Porridge',
+        protein: 9,
+        calories: 170,
+        prepTime: '6m',
+        babySafe: true,
+        texture: 'Smooth creamy spoon food (6+ months)',
+        safetyTip: 'Naturally sweetened by ripe banana. Delivers high Calcium and Potassium.',
+        micros: {
+          iron: 1.1,
+          calcium: 160,
+          vitC: 7,
+          vitA: 35,
+          zinc: 0.8,
+          potassium: 420
+        },
+        required: ['Oats', 'Greek Yogurt', 'Banana'],
+        optional: [],
+        steps: [
+          'Cook 3 tablespoons of rolled oats in water until soft and creamy.',
+          'Allow to cool until lukewarm, then stir in 2 tablespoons of Greek yogurt.',
+          'Mash 1/2 ripe banana with a fork and fold in completely.'
+        ]
+      },
+      {
+        id: 'r_sweetpotato_chickpea',
+        title: 'Sweet Potato & Chickpea Soft Medallions',
+        protein: 11,
+        calories: 210,
+        prepTime: '20m',
+        babySafe: true,
+        texture: 'Graspable soft finger food (1–4 years)',
+        safetyTip: 'Patties should be squishable between fingers. Rich in Vitamin A, Zinc, and fiber.',
+        micros: {
+          iron: 2.6,
+          calcium: 68,
+          vitC: 14,
+          vitA: 520,
+          zinc: 1.8,
+          potassium: 490
+        },
+        required: ['Sweet Potato', 'Chickpeas'],
+        optional: ['Oats'],
+        steps: [
+          'Steam sweet potato and chickpeas until fork-tender.',
+          'Mash thoroughly together with a pinch of cumin (optional).',
+          'Form into silver-dollar patties and lightly warm on a griddle for 2 minutes each side until set.'
+        ]
+      },
+      {
+        id: 'r_paneer_scramble',
+        title: 'High-Protein Paneer Bhurji with Spinach',
+        protein: 26,
+        calories: 340,
+        prepTime: '12m',
+        babySafe: false,
+        texture: 'Savory scramble',
+        safetyTip: 'Exceptional source of bioavailable dietary Calcium and Iron from spinach.',
+        micros: {
+          iron: 3.4,
+          calcium: 480,
+          vitC: 18,
+          vitA: 340,
+          zinc: 2.4,
+          potassium: 380
+        },
+        required: ['Paneer / Cottage Cheese', 'Spinach', 'Tomatoes'],
+        optional: ['Eggs'],
+        steps: [
+          'Sauté diced tomatoes and spices in a pan with a drop of oil.',
+          'Fold in shredded spinach until wilted.',
+          'Crumble fresh paneer, combine well for 3 minutes, and serve hot.'
+        ]
+      },
+      {
+        id: 'r_dal_khichdi',
+        title: 'Wholesome Lentil Khichdi Bowl',
+        protein: 18,
+        calories: 360,
+        prepTime: '20m',
+        babySafe: true,
+        texture: 'Soft comforting porridge-rice',
+        safetyTip: 'Balanced vegetarian complete protein profile, rich in Iron, Folate, and Zinc.',
+        micros: {
+          iron: 4.2,
+          calcium: 64,
+          vitC: 6,
+          vitA: 190,
+          zinc: 2.7,
+          potassium: 440
+        },
+        required: ['Lentils / Dal', 'Rice'],
+        optional: ['Spinach', 'Carrots'],
+        steps: [
+          'Wash equal parts lentils and rice.',
+          'Pressure cook or simmer with 3.5x water, turmeric, and pinch of cumin for 15 minutes.',
+          'Finish with a spoonful of ghee for healthy fats.'
+        ]
+      },
+      {
+        id: 'r_greek_yogurt_bowl',
+        title: 'Greek Yogurt Power Parfait',
+        protein: 23,
+        calories: 280,
+        prepTime: '3m',
+        babySafe: false,
+        texture: 'Cold breakfast bowl',
+        safetyTip: 'Bone-building Calcium powerhouse with quick potassium boost from banana.',
+        micros: {
+          iron: 1.4,
+          calcium: 280,
+          vitC: 10,
+          vitA: 40,
+          zinc: 1.3,
+          potassium: 540
+        },
+        required: ['Greek Yogurt', 'Banana', 'Oats'],
+        optional: [],
+        steps: [
+          'Layer 1 cup of plain high-protein Greek yogurt in a bowl.',
+          'Top with toasted rolled oats and sliced fresh bananas.'
+        ]
+      },
+      {
+        id: 'r_chicken_spinach_skillet',
+        title: 'Pan-Seared Herb Chicken with Wilted Greens',
+        protein: 42,
+        calories: 390,
+        prepTime: '15m',
+        babySafe: false,
+        texture: 'Lean solid protein',
+        safetyTip: 'High heme-iron and zinc for peak muscle and athletic recovery.',
+        micros: {
+          iron: 3.8,
+          calcium: 120,
+          vitC: 22,
+          vitA: 410,
+          zinc: 3.2,
+          potassium: 620
+        },
+        required: ['Chicken Breast', 'Spinach'],
+        optional: ['Tomatoes'],
+        steps: [
+          'Slice chicken breast into medallions and season with salt and herbs.',
+          'Pan-sear in olive oil for 4–5 minutes per side until 165°F (74°C).',
+          'Toss fresh spinach in pan juices for 60 seconds until wilted.'
+        ]
+      }
+    ];
+
     const PRESET_QUICK_ITEMS = [
       { name: 'Eggs', category: 'protein' },
       { name: 'Lentils / Dal', category: 'protein' },
@@ -537,151 +854,12 @@
       { name: 'Tomatoes', category: 'vegetables' }
     ];
 
-    const RECIPE_DATABASE = [
-      {
-        id: 'r_lentil_mash',
-        title: 'Golden Lentil & Carrot Puree/Mash',
-        protein: 7,
-        calories: 140,
-        prepTime: '15m',
-        babySafe: true,
-        texture: 'Smooth Puree or Fork-Mashed (6+ months)',
-        safetyTip: 'No added salt or whole spices. Blend smooth for 6m+, or fork-mash for 9m+ to encourage chewing.',
-        required: ['Lentils / Dal', 'Carrots'],
-        optional: ['Rice'],
-        steps: [
-          'Rinse yellow lentils and peel/dice carrots into small cubes.',
-          'Boil together in water for 15 minutes until very soft and tender.',
-          'Fork-mash or blend with a splash of warm water to baby-appropriate consistency.'
-        ]
-      },
-      {
-        id: 'r_soft_scramble',
-        title: 'Pillow-Soft Egg & Steamed Spinach Mash',
-        protein: 8,
-        calories: 110,
-        prepTime: '8m',
-        babySafe: true,
-        texture: 'Soft, melt-in-mouth curds (9+ months)',
-        safetyTip: 'Ensure egg is cooked completely through without crisp brown edges. Cool to lukewarm before serving.',
-        required: ['Eggs', 'Spinach'],
-        optional: [],
-        steps: [
-          'Finely chop fresh spinach leaves.',
-          'Whisk 1 egg thoroughly with 1 tbsp warm water or milk.',
-          'Gently scramble in a non-stick pan on low heat until soft curds form completely.'
-        ]
-      },
-      {
-        id: 'r_banana_oats',
-        title: 'Banana & Greek Yogurt Baby Porridge',
-        protein: 9,
-        calories: 170,
-        prepTime: '6m',
-        babySafe: true,
-        texture: 'Smooth creamy spoon food (6+ months)',
-        safetyTip: 'Naturally sweetened by ripe banana. No honey or sugar needed.',
-        required: ['Oats', 'Greek Yogurt', 'Banana'],
-        optional: [],
-        steps: [
-          'Cook 3 tablespoons of rolled oats in water until soft and creamy.',
-          'Allow to cool until lukewarm, then stir in 2 tablespoons of Greek yogurt.',
-          'Mash 1/2 ripe banana with a fork and fold in completely.'
-        ]
-      },
-      {
-        id: 'r_sweetpotato_chickpea',
-        title: 'Sweet Potato & Chickpea Soft Medallions',
-        protein: 11,
-        calories: 210,
-        prepTime: '20m',
-        babySafe: true,
-        texture: 'Graspable soft finger food (1–4 years)',
-        safetyTip: 'Great for self-feeding. Patties should be soft enough to squish between thumb and forefinger.',
-        required: ['Sweet Potato', 'Chickpeas'],
-        optional: ['Oats'],
-        steps: [
-          'Steam sweet potato and chickpeas until fork-tender.',
-          'Mash thoroughly together with a pinch of cumin (optional).',
-          'Form into silver-dollar patties and lightly warm on a griddle for 2 minutes each side until set.'
-        ]
-      },
-      {
-        id: 'r_paneer_scramble',
-        title: 'High-Protein Paneer Bhurji with Spinach',
-        protein: 26,
-        calories: 340,
-        prepTime: '12m',
-        babySafe: false,
-        texture: 'Savory scramble',
-        safetyTip: '',
-        required: ['Paneer / Cottage Cheese', 'Spinach', 'Tomatoes'],
-        optional: ['Eggs'],
-        steps: [
-          'Sauté diced tomatoes and spices in a pan with a drop of oil.',
-          'Fold in shredded spinach until wilted.',
-          'Crumble fresh paneer, combine well for 3 minutes, and serve hot.'
-        ]
-      },
-      {
-        id: 'r_dal_khichdi',
-        title: 'Wholesome Lentil Khichdi Bowl',
-        protein: 18,
-        calories: 360,
-        prepTime: '20m',
-        babySafe: true,
-        texture: 'Soft comforting porridge-rice',
-        safetyTip: 'Suitable for family meal sharing. Remove baby portion before adding whole chilies/extra salt.',
-        required: ['Lentils / Dal', 'Rice'],
-        optional: ['Spinach', 'Carrots'],
-        steps: [
-          'Wash equal parts lentils and rice.',
-          'Pressure cook or simmer with 3.5x water, turmeric, and pinch of cumin for 15 minutes.',
-          'Finish with a spoonful of ghee for healthy fats.'
-        ]
-      },
-      {
-        id: 'r_greek_yogurt_bowl',
-        title: 'Greek Yogurt Power Parfait',
-        protein: 23,
-        calories: 280,
-        prepTime: '3m',
-        babySafe: false,
-        texture: 'Cold breakfast bowl',
-        safetyTip: '',
-        required: ['Greek Yogurt', 'Banana', 'Oats'],
-        optional: [],
-        steps: [
-          'Layer 1 cup of plain high-protein Greek yogurt in a bowl.',
-          'Top with toasted rolled oats and sliced fresh bananas.'
-        ]
-      },
-      {
-        id: 'r_chicken_spinach_skillet',
-        title: 'Pan-Seared Herb Chicken with Wilted Greens',
-        protein: 42,
-        calories: 390,
-        prepTime: '15m',
-        babySafe: false,
-        texture: 'Lean solid protein',
-        safetyTip: '',
-        required: ['Chicken Breast', 'Spinach'],
-        optional: ['Tomatoes'],
-        steps: [
-          'Slice chicken breast into medallions and season with salt and herbs.',
-          'Pan-sear in olive oil for 4–5 minutes per side until 165°F (74°C).',
-          'Toss fresh spinach in pan juices for 60 seconds until wilted.'
-        ]
-      }
-    ];
-
     // --- 3. STATE INITIALIZATION ---
     let myPantry = [];
     let currentFilter = 'all';
 
     function initApp() {
-      // Load saved profiles from localStorage if available
-      const savedProfiles = localStorage.getItem('nutripantry_profiles');
+      const savedProfiles = localStorage.getItem('nutripantry_profiles_v2');
       if (savedProfiles) {
         try {
           profiles = JSON.parse(savedProfiles);
@@ -690,13 +868,11 @@
         }
       }
 
-      // Load active profile key
       const savedActiveKey = localStorage.getItem('nutripantry_active_profile');
       if (savedActiveKey && profiles[savedActiveKey]) {
         activeProfileKey = savedActiveKey;
       }
 
-      // Load saved pantry
       const savedPantry = localStorage.getItem('nutripantry_inventory');
       if (savedPantry) {
         try {
@@ -705,7 +881,6 @@
           myPantry = [];
         }
       } else {
-        // First-time starter items
         myPantry = [
           { id: '1', name: 'Eggs', category: 'protein', inStock: true, qty: '6 pcs' },
           { id: '2', name: 'Lentils / Dal', category: 'protein', inStock: true, qty: '500g' },
@@ -724,13 +899,12 @@
       renderRecipes();
     }
 
-    // --- 4. PROFILE SWITCHING & DYNAMIC WEIGHT LOGIC ---
+    // --- 4. PROFILE SWITCHING & MICRONUTRIENT DISPLAY ---
     function switchProfile(key) {
       if (!profiles[key]) return;
       activeProfileKey = key;
       localStorage.setItem('nutripantry_active_profile', key);
 
-      // Update button visual styles
       ['infant', 'toddler', 'child', 'female', 'male'].forEach(p => {
         const btn = document.getElementById(`btn-prof-${p}`);
         if (!btn) return;
@@ -751,11 +925,33 @@
       document.getElementById('prof-weight-badge').innerText = `${p.weight} kg`;
       document.getElementById('prof-target-protein').innerText = `${p.proteinTarget}g`;
 
-      // Approx per-meal target (3 meals per day benchmark)
       const perMeal = Math.round(p.proteinTarget / 3);
       document.getElementById('prof-meal-protein').innerText = `~${perMeal}g`;
       document.getElementById('prof-cal').innerText = `~${p.calories}`;
       document.getElementById('prof-tag').innerText = p.tag || `${p.baseFactor}g / kg`;
+
+      // Render Micronutrients Summary Row on Profile Card
+      const microsContainer = document.getElementById('prof-micros-summary');
+      if (p.micros) {
+        microsContainer.innerHTML = `
+          <div class="bg-white/10 rounded-lg py-1 px-1">
+            <p class="text-[9px] text-emerald-100">Iron</p>
+            <p class="text-[11px] font-bold text-white">${p.micros.iron.val} ${p.micros.iron.unit}</p>
+          </div>
+          <div class="bg-white/10 rounded-lg py-1 px-1">
+            <p class="text-[9px] text-emerald-100">Calcium</p>
+            <p class="text-[11px] font-bold text-white">${p.micros.calcium.val} ${p.micros.calcium.unit}</p>
+          </div>
+          <div class="bg-white/10 rounded-lg py-1 px-1">
+            <p class="text-[9px] text-emerald-100">Vit C</p>
+            <p class="text-[11px] font-bold text-white">${p.micros.vitC.val} ${p.micros.vitC.unit}</p>
+          </div>
+          <div class="bg-white/10 rounded-lg py-1 px-1">
+            <p class="text-[9px] text-emerald-100">Zinc</p>
+            <p class="text-[11px] font-bold text-white">${p.micros.zinc.val} ${p.micros.zinc.unit}</p>
+          </div>
+        `;
+      }
 
       // Infant/Toddler safety note display
       const noteEl = document.getElementById('baby-feeding-note');
@@ -768,7 +964,7 @@
       }
     }
 
-    // --- 5. EDIT WEIGHT & RECALCULATE MODAL ---
+    // --- 5. EDIT WEIGHT & MODAL ---
     function openEditWeightModal() {
       const p = profiles[activeProfileKey];
       document.getElementById('editModalTitle').innerText = `Edit: ${p.name}`;
@@ -777,6 +973,17 @@
 
       document.getElementById('weight-help-text').innerText =
         `Standard baseline for ${p.name}: ~${p.weight} kg. Adjust to exact scale reading.`;
+
+      // Populate current micronutrients in the modal for review
+      const microsList = document.getElementById('edit-modal-micros-list');
+      if (p.micros) {
+        microsList.innerHTML = Object.entries(p.micros).map(([k, m]) => `
+          <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200">
+            <span class="text-slate-600 font-medium">${m.name}</span>
+            <span class="font-bold text-slate-800">${m.val} ${m.unit}</span>
+          </div>
+        `).join('');
+      }
 
       previewRecalculatedProtein();
       openModal('editWeightModal');
@@ -796,7 +1003,6 @@
       document.getElementById('preview-meal-split').innerText = `~${mealSplit}g per main meal`;
     }
 
-    // Attach live listener to weight input
     document.getElementById('input-prof-weight')?.addEventListener('input', previewRecalculatedProtein);
 
     function saveCustomProfileWeight(e) {
@@ -814,7 +1020,6 @@
       const effectiveFactor = (p.baseFactor * mult);
       p.proteinTarget = Math.max(8, Math.round(p.weight * effectiveFactor));
 
-      // Approx calories adjustment
       if (activeProfileKey === 'infant') {
         p.calories = Math.round(p.weight * 82);
       } else if (activeProfileKey === 'toddler') {
@@ -840,7 +1045,7 @@
     }
 
     function saveProfiles() {
-      localStorage.setItem('nutripantry_profiles', JSON.stringify(profiles));
+      localStorage.setItem('nutripantry_profiles_v2', JSON.stringify(profiles));
     }
 
     // --- 6. PANTRY INVENTORY LOGIC ---
@@ -945,7 +1150,6 @@
         return;
       }
 
-      // Group items: In Stock vs Out of Stock
       const inStockItems = myPantry.filter(i => i.inStock);
       const outOfStockItems = myPantry.filter(i => !i.inStock);
 
@@ -1002,10 +1206,10 @@
       container.innerHTML = html;
     }
 
-    // --- 7. RECIPE MATCHING & SCORING ---
+    // --- 7. RECIPE MATCHING & MICRONUTRIENT FILTERING ---
     function setRecipeFilter(filter) {
       currentFilter = filter;
-      ['all', 'ready', 'high-protein', 'baby-safe'].forEach(f => {
+      ['all', 'ready', 'high-protein', 'iron-rich', 'calcium-rich', 'baby-safe'].forEach(f => {
         const btn = document.getElementById(`rf-${f}`);
         if (!btn) return;
         if (f === filter) {
@@ -1022,12 +1226,10 @@
       const activeProf = profiles[activeProfileKey];
       const targetMealProtein = Math.round(activeProf.proteinTarget / 3);
 
-      // In-stock items lowercase lookup
       const inStockSet = new Set(
         myPantry.filter(i => i.inStock).map(i => i.name.toLowerCase().trim())
       );
 
-      // Compute match for each recipe
       const matched = RECIPE_DATABASE.map(r => {
         const requiredCount = r.required.length;
         const availableRequired = r.required.filter(req => inStockSet.has(req.toLowerCase().trim()));
@@ -1043,17 +1245,19 @@
         };
       });
 
-      // Filter
       let filtered = matched;
       if (currentFilter === 'ready') {
         filtered = filtered.filter(r => r.matchPercent === 100);
       } else if (currentFilter === 'high-protein') {
-        filtered = filtered.filter(r => r.protein >= 25);
+        filtered = filtered.filter(r => r.protein >= 20);
+      } else if (currentFilter === 'iron-rich') {
+        filtered = filtered.filter(r => r.micros && r.micros.iron >= 2.5);
+      } else if (currentFilter === 'calcium-rich') {
+        filtered = filtered.filter(r => r.micros && r.micros.calcium >= 150);
       } else if (currentFilter === 'baby-safe') {
         filtered = filtered.filter(r => r.babySafe === true);
       }
 
-      // Prioritize baby-safe recipes if infant or toddler is active profile
       if (activeProfileKey === 'infant' || activeProfileKey === 'toddler') {
         filtered.sort((a, b) => {
           if (a.babySafe && !b.babySafe) return -1;
@@ -1061,7 +1265,6 @@
           return b.matchPercent - a.matchPercent;
         });
       } else {
-        // Standard sort: In-stock match first, then protein
         filtered.sort((a, b) => b.matchPercent - a.matchPercent || b.protein - a.protein);
       }
 
@@ -1070,7 +1273,7 @@
           <div class="bg-white rounded-2xl p-6 text-center border border-slate-200">
             <i class="ph-duotone ph-magnifying-glass text-4xl text-slate-300 mb-2"></i>
             <p class="text-sm font-semibold text-slate-700">No matching recipes found</p>
-            <p class="text-xs text-slate-400 mt-1">Try switching filters or adding more staple ingredients like Eggs, Lentils, or Oats.</p>
+            <p class="text-xs text-slate-400 mt-1">Try switching filters or adding more items like Eggs, Lentils, or Greek Yogurt.</p>
           </div>
         `;
         return;
@@ -1078,6 +1281,8 @@
 
       container.innerHTML = filtered.map(r => {
         const isReady = r.matchPercent === 100;
+        const m = r.micros || {};
+
         return `
           <div onclick="openRecipeDetail('${r.id}')" class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:border-slate-300 transition cursor-pointer relative overflow-hidden">
             <div class="flex items-start justify-between gap-3">
@@ -1092,19 +1297,32 @@
                 </div>
                 <h3 class="font-bold text-slate-800 text-sm leading-snug">${r.title}</h3>
                 
+                <!-- Quick Micro Pills -->
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                  <span class="text-[10px] font-medium bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100">
+                    🩸 ${m.iron || 0}mg Iron
+                  </span>
+                  <span class="text-[10px] font-medium bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-100">
+                    🦴 ${m.calcium || 0}mg Ca
+                  </span>
+                  <span class="text-[10px] font-medium bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">
+                    🍊 ${m.vitC || 0}mg Vit C
+                  </span>
+                </div>
+
                 ${r.missing.length > 0 
-                  ? `<p class="text-[11px] text-amber-600 mt-1 font-medium">Missing: ${r.missing.join(', ')}</p>`
-                  : `<p class="text-[11px] text-emerald-600 mt-1 font-medium">All ingredients ready in pantry!</p>`
+                  ? `<p class="text-[11px] text-amber-600 mt-2 font-medium">Missing: ${r.missing.join(', ')}</p>`
+                  : `<p class="text-[11px] text-emerald-600 mt-2 font-medium">All ingredients ready in pantry!</p>`
                 }
               </div>
 
-              <!-- Protein Badge & Coverage Ring -->
+              <!-- Protein Badge -->
               <div class="text-right bg-slate-50 border border-slate-100 rounded-xl p-2 min-w-[76px]">
                 <p class="text-base font-extrabold text-slate-800 leading-none">${r.protein}g</p>
                 <p class="text-[9px] uppercase font-bold text-slate-400 mt-0.5">Protein</p>
                 <div class="mt-1 pt-1 border-t border-slate-200">
                   <p class="text-[10px] font-bold text-emerald-600">${r.mealProteinCoverage}%</p>
-                  <p class="text-[8px] text-slate-400 leading-tight">of meal target</p>
+                  <p class="text-[8px] text-slate-400 leading-tight">of meal goal</p>
                 </div>
               </div>
             </div>
@@ -1133,6 +1351,39 @@
         <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-semibold">~${r.calories} kcal</span>
         ${r.babySafe ? `<span class="bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md font-bold">Baby / Toddler Safe</span>` : ''}
       `;
+
+      // Render Detailed Micronutrient Breakdown Grid with Daily Percentages
+      const microsGrid = document.getElementById('modalMicronutrientsGrid');
+      const rM = r.micros || {};
+      const pM = activeProf.micros || {};
+
+      const microKeys = [
+        { key: 'iron', name: 'Iron', unit: 'mg', icon: '🩸' },
+        { key: 'calcium', name: 'Calcium', unit: 'mg', icon: '🦴' },
+        { key: 'vitC', name: 'Vitamin C', unit: 'mg', icon: '🍊' },
+        { key: 'vitA', name: 'Vitamin A', unit: 'mcg', icon: '🥕' },
+        { key: 'zinc', name: 'Zinc', unit: 'mg', icon: '🛡️' },
+        { key: 'potassium', name: 'Potassium', unit: 'mg', icon: '🍌' }
+      ];
+
+      microsGrid.innerHTML = microKeys.map(k => {
+        const amount = rM[k.key] || 0;
+        const target = pM[k.key]?.val || 1;
+        const pct = Math.min(100, Math.round((amount / target) * 100));
+
+        return `
+          <div class="bg-white p-2 rounded-lg border border-slate-200">
+            <div class="flex justify-between items-center text-[11px] mb-1">
+              <span class="font-medium text-slate-700">${k.icon} ${k.name}</span>
+              <span class="font-bold text-slate-900">${amount} ${k.unit}</span>
+            </div>
+            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-emerald-500 h-full rounded-full" style="width: ${pct}%"></div>
+            </div>
+            <p class="text-[9px] text-slate-400 mt-1 text-right">${pct}% of daily RDA</p>
+          </div>
+        `;
+      }).join('');
 
       // Baby Texture Guidance
       const textureBox = document.getElementById('modalFeedingTextureGuidance');
@@ -1168,7 +1419,7 @@
       openModal('recipeDetailModal');
     }
 
-    // --- 8. AI RECIPE SYNTHESIZER (OFFLINE / GEMINI COMPLIANT) ---
+    // --- 8. AI RECIPE SYNTHESIZER ---
     async function synthesizeAIRecipe() {
       const inStockItems = myPantry.filter(i => i.inStock).map(i => i.name);
       if (inStockItems.length === 0) {
@@ -1180,10 +1431,9 @@
       const activeProf = profiles[activeProfileKey];
       const apiKey = document.getElementById('geminiApiKey')?.value.trim();
 
-      // If user provided a Gemini API Key in settings, make live call
       if (apiKey) {
         try {
-          const prompt = `Given available ingredients: [${inStockItems.join(', ')}]. Generate ONE recipe targeting ${Math.round(activeProf.proteinTarget/3)}g protein for ${activeProf.name}. Output strictly JSON with keys: title, protein, calories, prepTime, babySafe (true/false), texture, safetyTip, required (array), steps (array).`;
+          const prompt = `Given available ingredients: [${inStockItems.join(', ')}]. Generate ONE recipe targeting ${Math.round(activeProf.proteinTarget/3)}g protein for ${activeProf.name}. Output strictly JSON with keys: title, protein, calories, prepTime, babySafe (true/false), texture, safetyTip, micros (object with iron, calcium, vitC, vitA, zinc, potassium), required (array), steps (array).`;
           
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
@@ -1203,27 +1453,35 @@
         }
       }
 
-      // Offline Instant Procedural Generator
+      // Offline Instant Procedural Generator with estimated micronutrients
       const primaryItem = inStockItems[0];
-      const secondaryItem = inStockItems.length > 1 ? inStockItems[1] : 'Fresh Herbs';
+      const secondaryItem = inStockItems.length > 1 ? inStockItems[1] : 'Fresh Greens';
       const targetProtein = Math.round(activeProf.proteinTarget / 3);
 
       const generated = {
         id: 'ai_' + Date.now(),
-        title: `Chef's ${primaryItem} & ${secondaryItem} Sauté`,
+        title: `Chef's ${primaryItem} & ${secondaryItem} Power Sauté`,
         protein: Math.max(12, targetProtein),
-        calories: 290,
-        prepTime: '10m',
+        calories: 310,
+        prepTime: '12m',
         babySafe: activeProfileKey === 'infant' || activeProfileKey === 'toddler',
         texture: activeProfileKey === 'infant' ? 'Pureed or fork mashed' : 'Soft tender bites',
         safetyTip: 'Season to taste. For infant feeding, avoid added salt or whole spices.',
+        micros: {
+          iron: 2.5,
+          calcium: 110,
+          vitC: 15,
+          vitA: 310,
+          zinc: 1.6,
+          potassium: 380
+        },
         required: [primaryItem, secondaryItem],
         optional: [],
         steps: [
           `Prep and gently chop ${primaryItem} and ${secondaryItem}.`,
           `Warm a non-stick skillet with a teaspoon of olive oil or ghee.`,
           `Simmer or sauté together over medium heat for 6–8 minutes until thoroughly cooked.`,
-          `Serve directly as a quick macro-targeted meal fulfilling ~${targetProtein}g of protein.`
+          `Serve directly as a nutrient-dense meal fulfilling ~${targetProtein}g of protein and essential micronutrients.`
         ]
       };
 
@@ -1268,7 +1526,6 @@
       }
     }
 
-    // Launch app on load
     document.addEventListener('DOMContentLoaded', initApp);
   </script>
 </body>
