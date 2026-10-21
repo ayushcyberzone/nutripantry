@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>NutriPantry - Smart Nutrition & Pantry</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857'
+            },
+            protein: '#f97316',
+            accent: '#6366f1'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Mobile app native polish */
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    input, textarea, select {
+      user-select: text;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased flex flex-col h-screen overflow-hidden">
+
+  <!-- TOP HEADER -->
+  <header class="bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 shrink-0 flex items-center justify-between z-20">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-emerald-400 flex items-center justify-center text-white shadow-sm shadow-brand-500/20">
+        <i class="ph-bold ph-bowl-food text-xl"></i>
+      </div>
+      <div>
+        <h1 class="text-base font-bold text-slate-900 leading-tight">NutriPantry</h1>
+        <p class="text-[11px] font-medium text-slate-400 leading-tight" id="headerSubtitle">Active: Adult Male (70g)</p>
+      </div>
+    </div>
+
+    <!-- Active Profile Quick Switcher -->
+    <div class="flex items-center gap-2">
+      <button onclick="openProfileModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-xs font-semibold transition">
+        <i class="ph-bold ph-user-circle text-base text-brand-600" id="headerProfileIcon"></i>
+        <span id="headerProfileName">Adult Male</span>
+        <i class="ph ph-caret-down text-slate-400 text-xs"></i>
+      </button>
+      <button onclick="openSettingsModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition" title="Settings & API Key">
+        <i class="ph-bold ph-gear text-sm"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN SCROLLABLE CONTENT AREA -->
+  <main class="flex-1 overflow-y-auto px-4 py-4 safe-bottom hide-scrollbar" id="mainContainer">
+
+    <!-- TAB 1: PANTRY INVENTORY -->
+    <section id="tab-pantry" class="space-y-4">
+      <!-- Quick Status Card -->
+      <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-4 text-white shadow-md shadow-emerald-900/10">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <span class="text-xs uppercase font-bold tracking-wider text-emerald-200">Inventory Status</span>
+            <h2 class="text-2xl font-black text-white mt-0.5"><span id="pantryItemCount">0</span> Items In Stock</h2>
+          </div>
+          <span class="px-2.5 py-1 bg-white/20 backdrop-blur rounded-full text-xs font-semibold" id="proteinPantryCount">
+            0 High Protein
+          </span>
+        </div>
+        <p class="text-xs text-emerald-100/90">Items are saved locally. Recipes will automatically adapt to your stock.</p>
+      </div>
+
+      <!-- Quick Add Pills -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Quick One-Tap Add</label>
+          <span class="text-[11px] text-brand-600 font-medium">Common Staples</span>
+        </div>
+        <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1 text-xs" id="quickAddList">
+          <!-- Dynamic Quick Buttons -->
+        </div>
+      </div>
+
+      <!-- Add New Custom Item Input -->
+      <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+        <div class="flex gap-2">
+          <input type="text" id="customItemName" placeholder="Add custom item (e.g. Tofu, Chickpeas...)" 
+            class="flex-1 text-sm bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium" />
+          <button onclick="addCustomPantryItem()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-sm font-semibold rounded-xl flex items-center gap-1 shadow-sm transition">
+            <i class="ph-bold ph-plus"></i> Add
+          </button>
+        </div>
+        <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar text-xs">
+          <span class="text-slate-400 font-medium whitespace-nowrap">Category:</span>
+          <select id="customItemCategory" class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 text-xs font-medium focus:outline-none">
+            <option value="Proteins">🥩 Protein</option>
+            <option value="Veggies">🥦 Veggie</option>
+            <option value="Carbs">🍚 Grain / Carb</option>
+            <option value="Dairy">🧀 Dairy / Alt</option>
+            <option value="Staples">🧂 Staple / Spice</option>
+          </select>
+          <input type="number" id="customItemQty" placeholder="Qty" value="1" min="1" class="w-16 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-center text-xs font-medium" />
+          <input type="text" id="customItemUnit" placeholder="Unit (pcs/g)" value="pack" class="w-20 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium" />
+        </div>
+      </div>
+
+      <!-- Filter Categories & Search -->
+      <div class="flex items-center justify-between gap-2 pt-2">
+        <div class="relative flex-1">
+          <i class="ph ph-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+          <input type="text" id="pantrySearch" oninput="renderPantryList()" placeholder="Filter pantry items..." class="w-full text-xs bg-white border border-slate-200 pl-8 pr-3 py-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-brand-500" />
+        </div>
+        <button onclick="resetDefaultPantry()" class="px-2.5 py-2 text-xs font-medium text-slate-500 hover:text-rose-600 rounded-xl border border-slate-200 bg-white" title="Reset to Starter Pack">
+          <i class="ph ph-arrow-counter-clockwise"></i> Reset
+        </button>
+      </div>
+
+      <!-- Inventory List by Category -->
+      <div id="pantryItemsContainer" class="space-y-3 pb-16">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- TAB 2: RECIPES MATCHING & GENERATION -->
+    <section id="tab-recipes" class="space-y-4 hidden">
+      <!-- Top Target Highlight for Active Profile -->
+      <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-md flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-400" id="recipeActiveTargetBadge">Targeting 70g Protein</span>
+          <h3 class="text-sm font-semibold text-slate-200 mt-0.5" id="recipeProfileSub">For Adult Male • ~23g/meal</h3>
+        </div>
+        <button onclick="openCustomAIGenerator()" class="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-brand-500 to-emerald-400 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20 active:scale-95 transition">
+          <i class="ph-bold ph-sparkle text-sm"></i> AI Creator
+        </button>
+      </div>
+
+      <!-- Filters & Sort -->
+      <div class="flex gap-1.5 overflow-x-auto hide-scrollbar pb-1 text-xs font-semibold">
+        <button onclick="setRecipeFilter('all')" id="rf-all" class="px-3 py-1.5 rounded-full bg-slate-900 text-white whitespace-nowrap">All Recipes</button>
+        <button onclick="setRecipeFilter('inStock')" id="rf-inStock" class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap">Ready to Cook (100%)</button>
+        <button onclick="setRecipeFilter('babyToddler')" id="rf-babyToddler" class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-pink-600 whitespace-nowrap">👶 Baby/Toddler Safe</button>
+        <button onclick="setRecipeFilter('highProtein')" id="rf-highProtein" class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap">High Protein (>25g)</button>
+        <button onclick="setRecipeFilter('kidFriendly')" id="rf-kidFriendly" class="px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap">Child (4-12y)</button>
+      </div>
+
+      <!-- Match Results Count -->
+      <div class="flex items-center justify-between text-xs text-slate-500 px-1">
+        <span id="recipesFoundCount">Finding best matching meals...</span>
+        <span class="text-[11px] text-slate-400 font-medium">Sorted by Pantry Match %</span>
+      </div>
+
+      <!-- Recipes Grid / Cards -->
+      <div id="recipeCardsContainer" class="space-y-3.5 pb-20">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- TAB 3: PROFILES & NUTRITION GOALS -->
+    <section id="tab-profiles" class="space-y-4 hidden pb-20">
+      <!-- Profile Header -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Nutritional Profiles</h2>
+            <p class="text-xs text-slate-500">Dietary Reference Intakes (DRI) by age & gender</p>
+          </div>
+          <span class="w-8 h-8 rounded-full bg-emerald-50 text-brand-600 flex items-center justify-center">
+            <i class="ph-bold ph-heartbeat text-lg"></i>
+          </span>
+        </div>
+
+        <!-- Current Active Profile Card -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl p-4">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-2xl" id="activeProfileAvatar">
+                👨
+              </div>
+              <div>
+                <span class="text-[11px] font-bold uppercase tracking-wider text-brand-400">Current Eater</span>
+                <h3 class="text-lg font-black text-white" id="activeProfileTitle">Adult Male</h3>
+                <p class="text-xs text-slate-300" id="activeProfileWeight">Standard 70 kg • Moderate Activity</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-700/80 grid grid-cols-3 gap-2 text-center">
+            <div class="bg-white/5 rounded-lg p-2">
+              <span class="text-[10px] text-slate-400 block font-semibold uppercase">Daily Protein</span>
+              <span class="text-base font-black text-brand-400" id="activeProfileProteinGoal">70g</span>
+            </div>
+            <div class="bg-white/5 rounded-lg p-2">
+              <span class="text-[10px] text-slate-400 block font-semibold uppercase">Per Meal Avg</span>
+              <span class="text-base font-black text-white" id="activeProfilePerMeal">23g</span>
+            </div>
+            <div class="bg-white/5 rounded-lg p-2">
+              <span class="text-[10px] text-slate-400 block font-semibold uppercase">Daily Calorie</span>
+              <span class="text-base font-black text-amber-300" id="activeProfileCalories">2200</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Selector Cards -->
+      <div>
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2 px-1">Switch or Customize Profile</label>
+        <div class="grid grid-cols-1 gap-2.5" id="profileSelectionCards">
+          <!-- Rendered in JS -->
+        </div>
+      </div>
+
+      <!-- Nutritional Science Guidelines Card -->
+      <div class="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-4 text-xs text-amber-900 space-y-2">
+        <div class="flex items-center gap-2 font-bold text-amber-950">
+          <i class="ph-bold ph-info text-base text-amber-600"></i>
+          <span>Recommended Daily Allowances (RDA) & Feeding Safety</span>
+        </div>
+        <p class="leading-relaxed text-amber-800">
+          • <strong>Infants (6–12 mos):</strong> ~11g daily protein. Smooth purees & soft mashes. <em>Strictly zero added salt, sugar, or honey (botulism risk).</em><br/>
+          • <strong>Toddlers (1–4 yrs):</strong> ~13–16g daily protein. Choking-hazard free finger foods, diced soft solids.<br/>
+          • <strong>Child (4–12 yrs):</strong> ~19–34g/day for bone and cognitive growth.<br/>
+          • <strong>Adults:</strong> ~46–75g/day based on biological sex, body weight, and physical activity.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAVIGATION DOCK -->
+  <nav class="bg-white border-t border-slate-200 px-6 py-2 shrink-0 flex justify-around items-center z-20 safe-bottom">
+    <button onclick="switchTab('pantry')" id="nav-pantry" class="flex flex-col items-center gap-1 text-brand-600 font-bold transition">
+      <i class="ph-bold ph-refrigerator text-xl"></i>
+      <span class="text-[11px]">Pantry</span>
+    </button>
+    <button onclick="switchTab('recipes')" id="nav-recipes" class="flex flex-col items-center gap-1 text-slate-400 font-semibold transition">
+      <i class="ph-bold ph-cooking-pot text-xl"></i>
+      <span class="text-[11px]">Recipes</span>
+    </button>
+    <button onclick="switchTab('profiles')" id="nav-profiles" class="flex flex-col items-center gap-1 text-slate-400 font-semibold transition">
+      <i class="ph-bold ph-user-list text-xl"></i>
+      <span class="text-[11px]">Nutrition</span>
+    </button>
+  </nav>
+
+  <!-- MODAL: RECIPE DETAIL -->
+  <div id="recipeDetailModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end transition-opacity">
+    <div class="bg-white rounded-t-3xl max-h-[90vh] overflow-y-auto w-full p-5 space-y-4 safe-bottom animate-slide-up">
+      <div class="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-2"></div>
+      
+      <div class="flex justify-between items-start">
+        <div>
+          <span id="modalRecipeTag" class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-brand-100 text-brand-700">High Protein</span>
+          <h2 id="modalRecipeTitle" class="text-xl font-black text-slate-900 mt-1">Lentil Spinach Dahl</h2>
+        </div>
+        <button onclick="closeRecipeModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <!-- Key Macros Grid -->
+      <div class="grid grid-cols-4 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100 text-center">
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 block uppercase">Protein</span>
+          <span id="modalRecipeProtein" class="text-base font-black text-protein">24g</span>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 block uppercase">Calories</span>
+          <span id="modalRecipeCalories" class="text-base font-black text-slate-700">380</span>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 block uppercase">Pantry Match</span>
+          <span id="modalRecipeMatch" class="text-base font-black text-brand-600">100%</span>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 block uppercase">Cook Time</span>
+          <span id="modalRecipeTime" class="text-base font-black text-slate-700">25m</span>
+        </div>
+      </div>
+
+      <!-- Texture & Safety Guidance Box -->
+      <div id="modalTextureBox" class="bg-pink-50 border border-pink-200 rounded-xl p-3 text-xs text-pink-900 hidden space-y-1">
+        <div class="flex items-center gap-1.5 font-bold text-pink-950">
+          <i class="ph-bold ph-baby text-base text-pink-600"></i>
+          <span id="modalTextureTitle">Texture & Infant Safety Guidance</span>
+        </div>
+        <p id="modalTextureDetail" class="text-[11px] leading-relaxed text-pink-800"></p>
+      </div>
+
+      <!-- Active Profile Target Fulfill Ring -->
+      <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 flex items-center justify-between text-xs text-emerald-900 font-medium">
+        <span id="modalTargetGoalText">Fulfills <strong>85%</strong> of your Lunch protein target.</span>
+        <i class="ph-bold ph-check-circle text-emerald-600 text-lg"></i>
+      </div>
+
+      <!-- Ingredients Comparison: Have vs Missing -->
+      <div class="space-y-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Ingredients Analysis</h3>
+        <div id="modalIngredientsList" class="space-y-1.5 text-xs">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Step-by-Step Instructions -->
+      <div class="space-y-2 pt-2 border-t border-slate-100">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Cooking Instructions</h3>
+        <ol id="modalInstructionsList" class="space-y-2 text-xs text-slate-700 list-decimal pl-4 leading-relaxed font-medium">
+          <!-- Injected dynamically -->
+        </ol>
+      </div>
+
+      <div class="pt-2">
+        <button onclick="closeRecipeModal()" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold text-sm">
+          Got It, Start Cooking
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AI RECIPE CREATOR -->
+  <div id="aiGeneratorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end">
+    <div class="bg-white rounded-t-3xl max-h-[92vh] overflow-y-auto w-full p-5 space-y-4 safe-bottom">
+      <div class="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-1"></div>
+      
+      <div class="flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <i class="ph-bold ph-sparkle text-lg"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-black text-slate-900">Custom Meal Generator</h2>
+            <p class="text-xs text-slate-500">Pick pantry items to craft a target meal</p>
+          </div>
+        </div>
+        <button onclick="closeCustomAIGenerator()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <!-- Target Selection -->
+      <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-2">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-slate-700">Target Profile:</span>
+          <span class="font-bold text-brand-600" id="aiModalTargetName">Adult Male</span>
+        </div>
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-slate-700">Desired Protein Target:</span>
+          <input type="number" id="aiDesiredProtein" value="30" class="w-20 text-center font-bold bg-white border border-slate-300 rounded-lg py-1 px-2 text-xs" />
+          <span class="text-slate-400">grams</span>
+        </div>
+      </div>
+
+      <!-- Multi-Select Ingredients from Current Pantry -->
+      <div>
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Select Ingredients to Use:</label>
+        <div id="aiPantryChecklist" class="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1 text-xs">
+          <!-- Populated from pantry -->
+        </div>
+      </div>
+
+      <!-- Meal Type -->
+      <div>
+        <label class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Meal Occasion:</label>
+        <div class="grid grid-cols-3 gap-2 text-xs font-semibold">
+          <button type="button" onclick="setAiMealType('Breakfast')" class="ai-meal-btn py-2 rounded-xl border border-brand-500 bg-brand-50 text-brand-700">Breakfast</button>
+          <button type="button" onclick="setAiMealType('Lunch')" class="ai-meal-btn py-2 rounded-xl border border-slate-200 bg-white text-slate-600">Lunch</button>
+          <button type="button" onclick="setAiMealType('Dinner')" class="ai-meal-btn py-2 rounded-xl border border-slate-200 bg-white text-slate-600">Dinner</button>
+        </div>
+      </div>
+
+      <!-- Output / Result Card if Generated -->
+      <div id="aiGenerationOutput" class="hidden p-3.5 bg-indigo-50/70 border border-indigo-200 rounded-2xl text-xs space-y-2">
+        <!-- Rendered output -->
+      </div>
+
+      <!-- Action Button -->
+      <button onclick="executeRecipeGeneration()" id="generateRecipeBtn" class="w-full py-3 bg-gradient-to-r from-brand-600 to-indigo-600 active:scale-98 text-white rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2">
+        <i class="ph-bold ph-magic-wand text-lg"></i>
+        <span>Synthesize Recipe</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTINGS & GEMINI API KEY -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex flex-col justify-end">
+    <div class="bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto w-full p-5 space-y-4 safe-bottom">
+      <div class="w-12 h-1.5 bg-slate-300 rounded-full mx-auto mb-1"></div>
+      
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-black text-slate-900">App Preferences & AI Key</h2>
+        <button onclick="closeSettingsModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold">
+          <i class="ph-bold ph-x"></i>
+        </button>
+      </div>
+
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-600 space-y-2">
+        <p class="font-medium">
+          NutriPantry contains <strong>built-in recipe matching & intelligent synthesis</strong> without requiring any internet keys.
+        </p>
+        <p class="text-slate-500 text-[11px]">
+          (Optional) If you have a Google Gemini API Key, you can add it here to enable live AI generative prompts.
+        </p>
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Gemini API Key (Optional)</label>
+        <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." class="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 font-mono focus:outline-none focus:ring-2 focus:ring-brand-500" />
+      </div>
+
+      <button onclick="saveSettings()" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold text-sm">
+        Save Preferences
+      </button>
+
+      <div class="pt-2 border-t border-slate-100 flex justify-between items-center text-xs">
+        <button onclick="clearAllData()" class="text-rose-600 font-semibold hover:underline">
+          Clear All Local Data
+        </button>
+        <span class="text-slate-400">NutriPantry v1.2</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastNotification" class="fixed top-5 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-lg pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-4 z-50 flex items-center gap-2">
+    <i class="ph-bold ph-check text-brand-400"></i>
+    <span id="toastMessage">Pantry updated</span>
+  </div>
+
+  <!-- CORE JAVASCRIPT APPLICATION LOGIC -->
+  <script>
+    // --- 1. STATE & DATA INITIALIZATION ---
+    const STORAGE_KEY_PANTRY = 'nutripantry_inventory_v1';
+    const STORAGE_KEY_PROFILE = 'nutripantry_active_profile_v1';
+    const STORAGE_KEY_CUSTOM_RECIPES = 'nutripantry_custom_recipes_v1';
+    const STORAGE_KEY_API = 'nutripantry_gemini_key_v1';
+
+    // Standard Profiles with DRI references (Infant 6m to Adults)
+    const PROFILES = {
+      infant: {
+        id: 'infant',
+        name: 'Infant (6-12 mos)',
+        avatar: '🍼',
+        weight: '7-10 kg',
+        dailyProtein: 11, // DRI ~11g
+        calories: 700,
+        activity: 'Developing',
+        desc: 'Smooth mashes & soft purees. Strictly zero added salt, honey, or whole nuts.'
+      },
+      toddler: {
+        id: 'toddler',
+        name: 'Toddler (1-4 yrs)',
+        avatar: '👶',
+        weight: '10-16 kg',
+        dailyProtein: 14, // DRI 13-16g
+        calories: 1100,
+        activity: 'High',
+        desc: 'Bite-sized, graspable soft finger foods. Choking-hazard free.'
+      },
+      child: {
+        id: 'child',
+        name: 'Older Child (4-12 yrs)',
+        avatar: '🧒',
+        weight: '20-35 kg',
+        dailyProtein: 28, // DRI 19-34g
+        calories: 1500,
+        activity: 'High',
+        desc: 'Nutrient-dense meals supporting active bone and cognitive development.'
+      },
+      female: {
+        id: 'female',
+        name: 'Adult Female',
+        avatar: '👩',
+        weight: '55-65 kg',
+        dailyProtein: 52, // DRI 46-60g
+        calories: 1800,
+        activity: 'Moderate',
+        desc: 'Optimized for steady energy, iron replenishment, and lean mass.'
+      },
+      male: {
+        id: 'male',
+        name: 'Adult Male',
+        avatar: '👨',
+        weight: '70-80 kg',
+        dailyProtein: 70, // DRI 56-75g
+        calories: 2200,
+        activity: 'Moderate',
+        desc: 'Recommended ~0.8g–1.2g/kg protein for vitality and energy.'
+      }
+    };
+
+    // Quick Add Staples (Enhanced with baby/toddler staples)
+    const QUICK_ADD_PRESETS = [
+      { name: 'Eggs', category: 'Proteins', unit: 'pcs', qty: 6 },
+      { name: 'Lentils / Dal', category: 'Proteins', unit: 'cup', qty: 2 },
+      { name: 'Carrots', category: 'Veggies', unit: 'pcs', qty: 3 },
+      { name: 'Sweet Potato', category: 'Carbs', unit: 'pcs', qty: 2 },
+      { name: 'Banana', category: 'Veggies', unit: 'pcs', qty: 3 },
+      { name: 'Rolled Oats', category: 'Carbs', unit: 'cup', qty: 2 },
+      { name: 'Greek Yogurt / Curd', category: 'Dairy', unit: 'cup', qty: 2 },
+      { name: 'Baby Spinach', category: 'Veggies', unit: 'pack', qty: 1 },
+      { name: 'Garbanzo Beans (Chickpeas)', category: 'Proteins', unit: 'can', qty: 1 },
+      { name: 'Paneer / Tofu', category: 'Proteins', unit: 'g', qty: 250 },
+      { name: 'Chicken Breast', category: 'Proteins', unit: 'g', qty: 500 },
+      { name: 'Basmati Rice', category: 'Carbs', unit: 'cup', qty: 3 },
+      { name: 'Onions & Garlic', category: 'Staples', unit: 'pcs', qty: 4 },
+      { name: 'Tomatoes', category: 'Veggies', unit: 'pcs', qty: 3 }
+    ];
+
+    // Default Starter Pantry
+    const STARTER_PANTRY = [
+      { id: '1', name: 'Eggs', category: 'Proteins', qty: 6, unit: 'pcs', isHighProtein: true },
+      { id: '2', name: 'Lentils / Dal', category: 'Proteins', qty: 2, unit: 'cup', isHighProtein: true },
+      { id: '3', name: 'Baby Spinach', category: 'Veggies', qty: 1, unit: 'pack', isHighProtein: false },
+      { id: '4', name: 'Greek Yogurt / Curd', category: 'Dairy', qty: 2, unit: 'cup', isHighProtein: true },
+      { id: '5', name: 'Rolled Oats', category: 'Carbs', qty: 2, unit: 'cup', isHighProtein: false },
+      { id: '6', name: 'Carrots', category: 'Veggies', qty: 2, unit: 'pcs', isHighProtein: false },
+      { id: '7', name: 'Sweet Potato', category: 'Carbs', qty: 2, unit: 'pcs', isHighProtein: false },
+      { id: '8', name: 'Banana', category: 'Veggies', qty: 2, unit: 'pcs', isHighProtein: false }
+    ];
+
+    // Master Catalog of Recipes including dedicated Infant & Toddler meals
+    const RECIPE_CATALOG = [
+      {
+        id: 'rec_infant_1',
+        title: 'Golden Lentil & Carrot Mash (6+ mos)',
+        category: 'Baby / Toddler',
+        protein: 4,
+        calories: 110,
+        cookTime: 18,
+        babyToddlerSafe: true,
+        texture: 'Silky Puree or Soft Fork Mash',
+        safetyTip: 'No added salt or honey. Ensure lentils are thoroughly cooked until falling apart soft.',
+        tags: ['Baby Safe (6m+)', 'Puree / Mash', 'No Added Salt'],
+        requiredIngredients: ['Lentils / Dal', 'Carrots'],
+        instructions: [
+          'Peel and dice carrots into small coins.',
+          'Rinse lentils thoroughly and simmer with carrots in 2 cups of water for 15-18 mins until completely tender.',
+          'For 6-8 mos: Blend into a silky smooth puree with cooking broth or breast milk / formula.',
+          'For 9-12 mos: Mash gently with a fork leaving soft micro-lumps for oral motor practice. Serve warm.'
+        ]
+      },
+      {
+        id: 'rec_infant_2',
+        title: 'Soft Scrambled Egg & Spinach Fluff (9+ mos)',
+        category: 'Baby / Toddler',
+        protein: 7,
+        calories: 120,
+        cookTime: 7,
+        babyToddlerSafe: true,
+        texture: 'Pillow-soft Curds',
+        safetyTip: 'Egg whites & yolks must be fully set to eliminate salmonella risk. Finely mince greens.',
+        tags: ['Baby Safe (9m+)', 'Iron & Choline', 'No Added Salt'],
+        requiredIngredients: ['Eggs', 'Baby Spinach'],
+        instructions: [
+          'Finely mince fresh baby spinach into microscopic shreds.',
+          'Crack and vigorously whisk 1 whole egg with 1 tbsp water or milk for fluffiness.',
+          'Warm a non-stick pan with a tiny drop of unsalted butter or olive oil on gentle low heat.',
+          'Pour in mixture, folding continuously until soft, custard-like, fully cooked curds form. Cool before serving.'
+        ]
+      },
+      {
+        id: 'rec_infant_3',
+        title: 'Creamy Greek Yogurt & Banana Oat Porridge (6+ mos)',
+        category: 'Baby / Toddler',
+        protein: 6,
+        calories: 145,
+        cookTime: 8,
+        babyToddlerSafe: true,
+        texture: 'Thick Creamy Spoon Food',
+        safetyTip: 'Do not sweeten with honey (infant botulism risk). Natural banana sweetness is gentle and safe.',
+        tags: ['Baby Safe (6m+)', 'Gut Friendly', 'No Added Sugar'],
+        requiredIngredients: ['Rolled Oats', 'Greek Yogurt / Curd', 'Banana'],
+        instructions: [
+          'Pulse oats briefly or use quick oats. Simmer 3 tbsp oats in water for 5 minutes until soft and creamy.',
+          'Mash 1/3 ripe banana with a fork until thoroughly liquefied.',
+          'Let oatmeal cool to lukewarm, then stir in the mashed banana and 2 tbsp pasteurized whole-milk Greek yogurt.',
+          'Test temperature on your inner wrist before serving.'
+        ]
+      },
+      {
+        id: 'rec_toddler_4',
+        title: 'Sweet Potato & Chickpea Soft Medallions (1-4 yrs)',
+        category: 'Baby / Toddler',
+        protein: 6,
+        calories: 160,
+        cookTime: 20,
+        babyToddlerSafe: true,
+        texture: 'Graspable Soft Finger Food',
+        safetyTip: 'Shape into thumb-sized flattenable discs that dissolve easily between toddler gums.',
+        tags: ['Toddler Finger Food (1-4y)', 'Self Feeding', 'High Fiber'],
+        requiredIngredients: ['Sweet Potato', 'Garbanzo Beans (Chickpeas)'],
+        instructions: [
+          'Steam or boil peeled sweet potato until fork tender.',
+          'Drain chickpeas and remove loose skins. Mash chickpeas and sweet potato together into a pliable dough.',
+          'Shape into small toddler-friendly patties (silver dollar size).',
+          'Lightly sear in a pan with a drop of olive oil for 2-3 mins per side until barely golden and soft throughout.'
+        ]
+      },
+      {
+        id: 'rec_1',
+        title: 'Spinach & Egg High-Protein Scramble',
+        category: 'Breakfast',
+        protein: 26,
+        calories: 320,
+        cookTime: 12,
+        kidFriendly: true,
+        highProtein: true,
+        tags: ['High Protein', 'Family Meal'],
+        requiredIngredients: ['Eggs', 'Baby Spinach', 'Onions & Garlic'],
+        instructions: [
+          'Whisk 3 eggs with a pinch of salt, pepper, and splash of water or milk.',
+          'Sauté chopped onions and garlic in olive oil or butter until fragrant.',
+          'Add fresh spinach leaves and stir until wilted (approx 1 min).',
+          'Pour in eggs, gently fold on low heat for soft curds. Serve warm.'
+        ]
+      },
+      {
+        id: 'rec_2',
+        title: 'Golden Turmeric Lentil Dahl with Rice',
+        category: 'Lunch/Dinner',
+        protein: 22,
+        calories: 440,
+        cookTime: 25,
+        kidFriendly: true,
+        highProtein: true,
+        tags: ['Balanced Family Meal', 'Fiber Rich'],
+        requiredIngredients: ['Lentils / Dal', 'Basmati Rice', 'Onions & Garlic', 'Tomatoes'],
+        instructions: [
+          'Wash lentils and boil in 3 cups of salted water until tender.',
+          'In a separate pan, sauté chopped onions, garlic, and diced tomatoes with cumin and turmeric.',
+          'Combine the fragrant tomato mixture into simmered lentils.',
+          'Simmer 5 minutes. Serve warm alongside steamed basmati rice.'
+        ]
+      },
+      {
+        id: 'rec_3',
+        title: 'Creamy Greek Yogurt & Oat Power Bowl',
+        category: 'Breakfast',
+        protein: 24,
+        calories: 360,
+        cookTime: 5,
+        kidFriendly: true,
+        highProtein: true,
+        tags: ['No Cook', 'High Protein'],
+        requiredIngredients: ['Greek Yogurt / Curd', 'Rolled Oats'],
+        instructions: [
+          'Add 1 cup of rich Greek yogurt to a bowl.',
+          'Mix in 1/2 cup rolled oats and let rest for 3 minutes to soften.',
+          'Top with fruit or a touch of honey if desired.'
+        ]
+      },
+      {
+        id: 'rec_5',
+        title: 'Tandoori-Style Spiced Chicken Breast & Rice',
+        category: 'Dinner',
+        protein: 42,
+        calories: 490,
+        cookTime: 22,
+        kidFriendly: false,
+        highProtein: true,
+        tags: ['Muscle Builder', 'High Protein for Men'],
+        requiredIngredients: ['Chicken Breast', 'Greek Yogurt / Curd', 'Basmati Rice', 'Onions & Garlic'],
+        instructions: [
+          'Marinate chicken strips in 2 tbsp Greek yogurt, minced garlic, paprika, and cumin.',
+          'Sear in a hot skillet for 6-8 minutes each side until deeply golden and cooked through.',
+          'Rest for 3 minutes, slice into strips and serve with steamed rice.'
+        ]
+      },
+      {
+        id: 'rec_7',
+        title: 'Fluffy Kid-Friendly Oat & Egg Mini Pancakes',
+        category: 'Breakfast',
+        protein: 16,
+        calories: 260,
+        cookTime: 10,
+        kidFriendly: true,
+        babyToddlerSafe: true,
+        texture: 'Spongy, Easy to Tear',
+        tags: ['Baby / Toddler Safe', 'Finger Food'],
+        requiredIngredients: ['Eggs', 'Rolled Oats', 'Banana'],
+        instructions: [
+          'Blend 1 ripe banana, 1 egg, and 1/3 cup rolled oats until completely smooth.',
+          'Spoon silver-dollar size discs onto a hot non-stick pan without extra sugar.',
+          'Cook 2 minutes on low until bubbles appear, flip gently and cook 1 more minute.',
+          'Cut into thin finger strips for toddlers or serve as mini pancakes.'
+        ]
+      }
+    ];
+
+    // App state
+    let pantry = [];
+    let currentProfile = 'infant';
+    let currentRecipeFilter = 'all';
+    let selectedAiMealType = 'Lunch';
+
+    // --- 2. LIFECYCLE & STORAGE HELPERS ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initApp();
+    });
+
+    function initApp() {
+      // Load saved pantry or defaults
+      const savedPantry = localStorage.getItem(STORAGE_KEY_PANTRY);
+      if (savedPantry) {
+        try {
+          pantry = JSON.parse(savedPantry);
+        } catch (e) {
+          pantry = [...STARTER_PANTRY];
+        }
+      } else {
+        pantry = [...STARTER_PANTRY];
+        savePantryToStorage();
+      }
+
+      // Load active profile
+      const savedProf = localStorage.getItem(STORAGE_KEY_PROFILE);
+      if (savedProf && PROFILES[savedProf]) {
+        currentProfile = savedProf;
+      }
+
+      // Load Settings API key
+      const key = localStorage.getItem(STORAGE_KEY_API) || '';
+      document.getElementById('geminiApiKeyInput').value = key;
+
+      renderQuickAddButtons();
+      renderPantryList();
+      updateProfileUI();
+      renderProfileSelection();
+      renderRecipes();
+    }
+
+    function savePantryToStorage() {
+      localStorage.setItem(STORAGE_KEY_PANTRY, JSON.stringify(pantry));
+      document.getElementById('pantryItemCount').innerText = pantry.length;
+      const highProtCount = pantry.filter(i => i.category === 'Proteins' || i.isHighProtein).length;
+      document.getElementById('proteinPantryCount').innerText = `${highProtCount} Protein Sources`;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotification');
+      document.getElementById('toastMessage').innerText = msg;
+      toast.classList.remove('opacity-0', '-translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', '-translate-y-4');
+      }, 2000);
+    }
+
+    // --- 3. TAB NAVIGATION ---
+    function switchTab(tabId) {
+      const tabs = ['pantry', 'recipes', 'profiles'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        const nav = document.getElementById(`nav-${t}`);
+        if (t === tabId) {
+          el.classList.remove('hidden');
+          nav.classList.add('text-brand-600', 'font-bold');
+          nav.classList.remove('text-slate-400', 'font-semibold');
+        } else {
+          el.classList.add('hidden');
+          nav.classList.remove('text-brand-600', 'font-bold');
+          nav.classList.add('text-slate-400', 'font-semibold');
+        }
+      });
+
+      if (tabId === 'recipes') {
+        renderRecipes();
+      }
+    }
+
+    // --- 4. PANTRY MANAGEMENT ---
+    function renderQuickAddButtons() {
+      const container = document.getElementById('quickAddList');
+      container.innerHTML = '';
+      QUICK_ADD_PRESETS.forEach(item => {
+        const inPantry = pantry.some(p => p.name.toLowerCase() === item.name.toLowerCase());
+        const btn = document.createElement('button');
+        btn.className = `px-3 py-1.5 rounded-full border text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
+          inPantry 
+            ? 'bg-emerald-50 text-emerald-800 border-emerald-300' 
+            : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+        }`;
+        btn.innerHTML = `
+          <span>${item.name}</span>
+          <i class="ph-bold ${inPantry ? 'ph-check text-brand-600' : 'ph-plus text-slate-400'}"></i>
+        `;
+        btn.onclick = () => quickTogglePantry(item);
+        container.appendChild(btn);
+      });
+    }
+
+    function quickTogglePantry(item) {
+      const idx = pantry.findIndex(p => p.name.toLowerCase() === item.name.toLowerCase());
+      if (idx > -1) {
+        pantry.splice(idx, 1);
+        showToast(`Removed ${item.name}`);
+      } else {
+        pantry.push({
+          id: Date.now().toString(),
+          name: item.name,
+          category: item.category,
+          qty: item.qty,
+          unit: item.unit,
+          isHighProtein: item.category === 'Proteins'
+        });
+        showToast(`Added ${item.name}`);
+      }
+      savePantryToStorage();
+      renderQuickAddButtons();
+      renderPantryList();
+    }
+
+    function addCustomPantryItem() {
+      const nameInput = document.getElementById('customItemName');
+      const catSelect = document.getElementById('customItemCategory');
+      const qtyInput = document.getElementById('customItemQty');
+      const unitInput = document.getElementById('customItemUnit');
+
+      const name = nameInput.value.trim();
+      if (!name) return;
+
+      const category = catSelect.value;
+      const qty = parseFloat(qtyInput.value) || 1;
+      const unit = unitInput.value.trim() || 'unit';
+
+      pantry.push({
+        id: Date.now().toString(),
+        name: name,
+        category: category,
+        qty: qty,
+        unit: unit,
+        isHighProtein: category === 'Proteins'
+      });
+
+      savePantryToStorage();
+      renderPantryList();
+      renderQuickAddButtons();
+      nameInput.value = '';
+      showToast(`Added ${name}`);
+    }
+
+    function removePantryItem(id) {
+      pantry = pantry.filter(i => i.id !== id);
+      savePantryToStorage();
+      renderPantryList();
+      renderQuickAddButtons();
+      showToast('Item removed');
+    }
+
+    function updateItemQty(id, delta) {
+      const item = pantry.find(i => i.id === id);
+      if (!item) return;
+      item.qty = Math.max(1, (item.qty || 1) + delta);
+      savePantryToStorage();
+      renderPantryList();
+    }
+
+    function renderPantryList() {
+      const container = document.getElementById('pantryItemsContainer');
+      const query = (document.getElementById('pantrySearch').value || '').toLowerCase();
+      container.innerHTML = '';
+
+      const filtered = pantry.filter(i => i.name.toLowerCase().includes(query));
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 bg-white rounded-2xl border border-dashed border-slate-300 p-6">
+            <i class="ph-bold ph-basket text-4xl text-slate-300 mb-2"></i>
+            <p class="text-sm font-semibold text-slate-700">Pantry is empty</p>
+            <p class="text-xs text-slate-400 mt-1">Tap a preset above or add items to receive recipe matches.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Group by category
+      const categories = ['Proteins', 'Dairy', 'Veggies', 'Carbs', 'Staples'];
+      const catIcons = {
+        Proteins: '🥩',
+        Dairy: '🧀',
+        Veggies: '🥦',
+        Carbs: '🍚',
+        Staples: '🧂'
+      };
+
+      categories.forEach(cat => {
+        const items = filtered.filter(i => i.category === cat);
+        if (items.length === 0) return;
+
+        const catBlock = document.createElement('div');
+        catBlock.className = 'space-y-1.5';
+        
+        let headerHtml = `
+          <div class="flex items-center justify-between text-xs font-bold text-slate-500 uppercase px-1 pt-1">
+            <span>${catIcons[cat] || '📦'} ${cat}</span>
+            <span class="text-[11px] text-slate-400 font-medium">${items.length} items</span>
+          </div>
+        `;
+
+        let listHtml = '<div class="bg-white rounded-2xl border border-slate-200/80 divide-y divide-slate-100 shadow-sm overflow-hidden">';
+        items.forEach(item => {
+          listHtml += `
+            <div class="p-3 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg ${cat === 'Proteins' ? 'bg-orange-50 text-orange-600' : 'bg-slate-100 text-slate-600'} flex items-center justify-center font-bold text-xs">
+                  ${catIcons[cat] || '•'}
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800">${item.name}</h4>
+                  <span class="text-[11px] text-slate-400 font-medium">${item.qty} ${item.unit || ''}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button onclick="updateItemQty('${item.id}', -1)" class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold text-xs">-</button>
+                <span class="w-6 text-center text-xs font-bold text-slate-700">${item.qty}</span>
+                <button onclick="updateItemQty('${item.id}', 1)" class="w-6 h-6 rounded-md bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center font-bold text-xs">+</button>
+                <button onclick="removePantryItem('${item.id}')" class="w-7 h-7 ml-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition">
+                  <i class="ph ph-trash text-sm"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        });
+        listHtml += '</div>';
+
+        catBlock.innerHTML = headerHtml + listHtml;
+        container.appendChild(catBlock);
+      });
+    }
+
+    function resetDefaultPantry() {
+      if (confirm && !window.__confirm_mock) {
+        // Safe UI confirmation without alert/confirm
+      }
+      pantry = JSON.parse(JSON.stringify(STARTER_PANTRY));
+      savePantryToStorage();
+      renderQuickAddButtons();
+      renderPantryList();
+      showToast('Pantry reset to starter stock');
+    }
+
+    // --- 5. RECIPE MATCHING & SCALING LOGIC ---
+    function getAllRecipes() {
+      const storedCustom = localStorage.getItem(STORAGE_KEY_CUSTOM_RECIPES);
+      let custom = [];
+      if (storedCustom) {
+        try { custom = JSON.parse(storedCustom); } catch(e) {}
+      }
+      return [...custom, ...RECIPE_CATALOG];
+    }
+
+    function evaluateRecipeMatch(recipe) {
+      const pantryNames = pantry.map(p => p.name.toLowerCase());
+      const required = recipe.requiredIngredients || [];
+      
+      let matchedCount = 0;
+      let missing = [];
+
+      required.forEach(req => {
+        const found = pantryNames.some(pName => 
+          pName.includes(req.toLowerCase()) || req.toLowerCase().includes(pName)
+        );
+        if (found) {
+          matchedCount++;
+        } else {
+          missing.push(req);
+        }
+      });
+
+      const matchPercent = required.length > 0 
+        ? Math.round((matchedCount / required.length) * 100) 
+        : 100;
+
+      return {
+        matchPercent,
+        matchedCount,
+        totalRequired: required.length,
+        missing
+      };
+    }
+
+    function setRecipeFilter(filterName) {
+      currentRecipeFilter = filterName;
+      ['all', 'inStock', 'babyToddler', 'highProtein', 'kidFriendly'].forEach(f => {
+        const btn = document.getElementById(`rf-${f}`);
+        if (!btn) return;
+        if (f === filterName) {
+          btn.className = 'px-3 py-1.5 rounded-full bg-slate-900 text-white whitespace-nowrap shadow-sm';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 whitespace-nowrap';
+        }
+      });
+      renderRecipes();
+    }
+
+    function renderRecipes() {
+      const container = document.getElementById('recipeCardsContainer');
+      container.innerHTML = '';
+
+      const recipes = getAllRecipes();
+      const prof = PROFILES[currentProfile];
+      const targetPerMeal = Math.max(3, Math.round(prof.dailyProtein / 3));
+
+      document.getElementById('recipeActiveTargetBadge').innerText = `Target: ${prof.dailyProtein}g Protein / Day`;
+      document.getElementById('recipeProfileSub').innerText = `For ${prof.name} • ~${targetPerMeal}g / meal`;
+
+      // Compute match for each
+      const evaluated = recipes.map(r => ({
+        ...r,
+        matchInfo: evaluateRecipeMatch(r)
+      }));
+
+      // Filter
+      let list = evaluated;
+      if (currentRecipeFilter === 'inStock') {
+        list = list.filter(r => r.matchInfo.matchPercent === 100);
+      } else if (currentRecipeFilter === 'babyToddler') {
+        list = list.filter(r => r.babyToddlerSafe);
+      } else if (currentRecipeFilter === 'highProtein') {
+        list = list.filter(r => r.protein >= 25);
+      } else if (currentRecipeFilter === 'kidFriendly') {
+        list = list.filter(r => r.kidFriendly || r.babyToddlerSafe);
+      }
+
+      // Priority sort: if active profile is infant/toddler, boost baby-safe dishes first
+      const isInfantOrToddler = currentProfile === 'infant' || currentProfile === 'toddler';
+      list.sort((a, b) => {
+        if (isInfantOrToddler) {
+          if (a.babyToddlerSafe && !b.babyToddlerSafe) return -1;
+          if (!a.babyToddlerSafe && b.babyToddlerSafe) return 1;
+        }
+        return b.matchInfo.matchPercent - a.matchInfo.matchPercent || b.protein - a.protein;
+      });
+
+      document.getElementById('recipesFoundCount').innerText = `${list.length} meal${list.length === 1 ? '' : 's'} available`;
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 bg-white rounded-2xl border border-slate-200 p-6">
+            <i class="ph-bold ph-egg-crack text-4xl text-slate-300 mb-2"></i>
+            <h4 class="text-sm font-bold text-slate-800">No matching recipes</h4>
+            <p class="text-xs text-slate-500 mt-1">Try switching filters or add items to your pantry.</p>
+          </div>
+        `;
+        return;
+      }
+
+      list.forEach(r => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 space-y-3 relative overflow-hidden transition active:scale-[0.99]';
+        
+        // Match Badge styling
+        let matchBadgeClass = 'bg-emerald-100 text-emerald-800';
+        if (r.matchInfo.matchPercent < 100 && r.matchInfo.matchPercent >= 60) {
+          matchBadgeClass = 'bg-amber-100 text-amber-800';
+        } else if (r.matchInfo.matchPercent < 60) {
+          matchBadgeClass = 'bg-slate-100 text-slate-600';
+        }
+
+        // Protein percentage of active user's per-meal goal
+        const percentMealProtein = Math.min(100, Math.round((r.protein / targetPerMeal) * 100));
+
+        card.innerHTML = `
+          <div class="flex justify-between items-start gap-2">
+            <div>
+              <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${matchBadgeClass}">
+                  ${r.matchInfo.matchPercent === 100 ? '✓ In Stock' : `${r.matchInfo.matchPercent}% Match`}
+                </span>
+                ${r.babyToddlerSafe ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pink-100 text-pink-700">👶 Baby/Toddler Safe</span>' : ''}
+                <span class="text-[10px] font-semibold text-slate-400">${r.category || 'Meal'}</span>
+              </div>
+              <h3 class="text-sm font-black text-slate-900 leading-snug">${r.title}</h3>
+              ${r.texture ? `<p class="text-[11px] text-pink-600 font-semibold mt-0.5"><i class="ph-bold ph-fork-knife text-[10px]"></i> ${r.texture}</p>` : ''}
+            </div>
+            <div class="text-right shrink-0">
+              <span class="text-base font-black text-protein">${r.protein}g</span>
+              <span class="block text-[10px] font-semibold text-slate-400">Protein</span>
+            </div>
+          </div>
+
+          <!-- Nutritional Progress Bar for Meal -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-[11px] font-medium text-slate-500">
+              <span>Fulfills <strong>${percentMealProtein}%</strong> of ${prof.name}'s meal goal</span>
+              <span>${r.calories} kcal</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              <div class="bg-gradient-to-r from-protein to-amber-500 h-1.5 rounded-full" style="width: ${percentMealProtein}%"></div>
+            </div>
+          </div>
+
+          <!-- Pantry Ingredient Breakdown -->
+          <div class="text-xs text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
+            <div class="flex items-center gap-1">
+              <i class="ph ph-clock text-slate-400"></i>
+              <span>${r.cookTime} mins</span>
+            </div>
+            ${r.matchInfo.missing.length > 0 ? `
+              <span class="text-[11px] text-amber-600 font-semibold truncate max-w-[170px]">
+                Missing: ${r.matchInfo.missing.join(', ')}
+              </span>
+            ` : `
+              <span class="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
+                <i class="ph-bold ph-check"></i> All ingredients ready
+              </span>
+            `}
+          </div>
+        `;
+
+        card.onclick = () => openRecipeDetailModal(r);
+        container.appendChild(card);
+      });
+    }
+
+    // --- 6. RECIPE MODAL DETAILS ---
+    function openRecipeDetailModal(recipe) {
+      const match = evaluateRecipeMatch(recipe);
+      const prof = PROFILES[currentProfile];
+      const targetPerMeal = Math.max(3, Math.round(prof.dailyProtein / 3));
+      const fulfillsPercent = Math.round((recipe.protein / targetPerMeal) * 100);
+
+      document.getElementById('modalRecipeTitle').innerText = recipe.title;
+      document.getElementById('modalRecipeProtein').innerText = `${recipe.protein}g`;
+      document.getElementById('modalRecipeCalories').innerText = recipe.calories;
+      document.getElementById('modalRecipeTime').innerText = `${recipe.cookTime}m`;
+      document.getElementById('modalRecipeMatch').innerText = `${match.matchPercent}%`;
+      document.getElementById('modalRecipeTag').innerText = recipe.babyToddlerSafe ? 'Infant / Toddler Safe' : (recipe.highProtein ? 'High Protein Meal' : 'Nutritious Choice');
+
+      // Texture guidance box for babies
+      const textureBox = document.getElementById('modalTextureBox');
+      if (recipe.babyToddlerSafe || recipe.texture) {
+        textureBox.classList.remove('hidden');
+        document.getElementById('modalTextureTitle').innerText = `Texture: ${recipe.texture || 'Soft consistency'}`;
+        document.getElementById('modalTextureDetail').innerText = recipe.safetyTip || 'Appropriate for developing palates. Prepare according to child age (puree for 6m, mashes for 9m, graspable pieces for 1yr+).';
+      } else {
+        textureBox.classList.add('hidden');
+      }
+
+      document.getElementById('modalTargetGoalText').innerHTML = `
+        Fulfills <strong>${fulfillsPercent}%</strong> of ${prof.name}'s meal target (${targetPerMeal}g).
+      `;
+
+      // Ingredients with checks
+      const ingList = document.getElementById('modalIngredientsList');
+      ingList.innerHTML = '';
+      const pantryNames = pantry.map(p => p.name.toLowerCase());
+
+      recipe.requiredIngredients.forEach(req => {
+        const haveIt = pantryNames.some(p => p.includes(req.toLowerCase()) || req.toLowerCase().includes(p));
+        const div = document.createElement('div');
+        div.className = `flex items-center justify-between p-2 rounded-xl border ${
+          haveIt ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900 font-medium' : 'bg-rose-50/60 border-rose-200 text-rose-800'
+        }`;
+        div.innerHTML = `
+          <div class="flex items-center gap-2">
+            <i class="ph-bold ${haveIt ? 'ph-check-circle text-emerald-600' : 'ph-x-circle text-rose-500'} text-base"></i>
+            <span>${req}</span>
+          </div>
+          <span class="text-[11px] font-semibold">${haveIt ? 'In Pantry' : 'Missing'}</span>
+        `;
+        ingList.appendChild(div);
+      });
+
+      // Steps
+      const stepsList = document.getElementById('modalInstructionsList');
+      stepsList.innerHTML = '';
+      (recipe.instructions || []).forEach(step => {
+        const li = document.createElement('li');
+        li.innerText = step;
+        stepsList.appendChild(li);
+      });
+
+      document.getElementById('recipeDetailModal').classList.remove('hidden');
+    }
+
+    function closeRecipeModal() {
+      document.getElementById('recipeDetailModal').classList.add('hidden');
+    }
+
+    // --- 7. PROFILES & NUTRITION ENGINE ---
+    function setProfile(profKey) {
+      if (!PROFILES[profKey]) return;
+      currentProfile = profKey;
+      localStorage.setItem(STORAGE_KEY_PROFILE, currentProfile);
+      updateProfileUI();
+      renderProfileSelection();
+      renderRecipes();
+      showToast(`Switched active profile: ${PROFILES[profKey].name}`);
+    }
+
+    function updateProfileUI() {
+      const p = PROFILES[currentProfile];
+      document.getElementById('headerProfileName').innerText = p.name;
+      document.getElementById('headerSubtitle').innerText = `Active: ${p.name} (${p.dailyProtein}g)`;
+      document.getElementById('activeProfileTitle').innerText = p.name;
+      document.getElementById('activeProfileAvatar').innerText = p.avatar;
+      document.getElementById('activeProfileWeight').innerText = `${p.weight} • ${p.activity} Activity`;
+      document.getElementById('activeProfileProteinGoal').innerText = `${p.dailyProtein}g`;
+      document.getElementById('activeProfileCalories').innerText = p.calories;
+      document.getElementById('activeProfilePerMeal').innerText = `${Math.round(p.dailyProtein / 3)}g`;
+    }
+
+    function renderProfileSelection() {
+      const container = document.getElementById('profileSelectionCards');
+      container.innerHTML = '';
+
+      Object.keys(PROFILES).forEach(k => {
+        const item = PROFILES[k];
+        const isActive = k === currentProfile;
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-2xl border transition flex items-center justify-between cursor-pointer ${
+          isActive 
+            ? 'bg-emerald-50/70 border-brand-500 shadow-sm' 
+            : 'bg-white border-slate-200 hover:border-slate-300'
+        }`;
+        card.onclick = () => setProfile(k);
+
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">${item.avatar}</span>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h4 class="text-sm font-bold text-slate-900">${item.name}</h4>
+                ${isActive ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-500 text-white">Active</span>' : ''}
+              </div>
+              <p class="text-xs text-slate-500">${item.desc}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-sm font-black text-brand-600">${item.dailyProtein}g</span>
+            <span class="block text-[10px] text-slate-400 font-bold uppercase">Daily</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openProfileModal() {
+      switchTab('profiles');
+    }
+
+    // --- 8. CUSTOM AI MEAL GENERATOR ---
+    function openCustomAIGenerator() {
+      const p = PROFILES[currentProfile];
+      document.getElementById('aiModalTargetName').innerText = p.name;
+      document.getElementById('aiDesiredProtein').value = Math.round(p.dailyProtein / 3);
+      
+      const listContainer = document.getElementById('aiPantryChecklist');
+      listContainer.innerHTML = '';
+
+      if (pantry.length === 0) {
+        listContainer.innerHTML = '<span class="text-xs text-slate-400 italic">No pantry items found. Add ingredients first.</span>';
+      } else {
+        pantry.forEach(item => {
+          const pill = document.createElement('label');
+          pill.className = 'cursor-pointer flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-medium text-slate-700';
+          pill.innerHTML = `
+            <input type="checkbox" value="${item.name}" class="ai-ingredient-chk rounded text-brand-600 focus:ring-0" checked />
+            <span>${item.name}</span>
+          `;
+          listContainer.appendChild(pill);
+        });
+      }
+
+      document.getElementById('aiGenerationOutput').classList.add('hidden');
+      document.getElementById('aiGeneratorModal').classList.remove('hidden');
+    }
+
+    function closeCustomAIGenerator() {
+      document.getElementById('aiGeneratorModal').classList.add('hidden');
+    }
+
+    function setAiMealType(type) {
+      selectedAiMealType = type;
+      document.querySelectorAll('.ai-meal-btn').forEach(btn => {
+        if (btn.innerText === type) {
+          btn.className = 'ai-meal-btn py-2 rounded-xl border border-brand-500 bg-brand-50 text-brand-700 font-semibold';
+        } else {
+          btn.className = 'ai-meal-btn py-2 rounded-xl border border-slate-200 bg-white text-slate-600 font-medium';
+        }
+      });
+    }
+
+    async function executeRecipeGeneration() {
+      const btn = document.getElementById('generateRecipeBtn');
+      const outputDiv = document.getElementById('aiGenerationOutput');
+      const checkboxes = document.querySelectorAll('.ai-ingredient-chk:checked');
+      const selectedIngredients = Array.from(checkboxes).map(c => c.value);
+      const targetProtein = parseInt(document.getElementById('aiDesiredProtein').value) || 25;
+      const apiKey = localStorage.getItem(STORAGE_KEY_API);
+
+      if (selectedIngredients.length === 0) {
+        showToast('Select at least 1 ingredient');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i> <span>Formulating Recipe...</span>`;
+
+      // If user provided Gemini Key, attempt dynamic AI completion; otherwise use smart procedural generator
+      let generatedRecipe = null;
+
+      if (apiKey && apiKey.trim().length > 15) {
+        try {
+          generatedRecipe = await fetchGeminiRecipe(apiKey, selectedIngredients, targetProtein, selectedAiMealType);
+        } catch (err) {
+          console.warn('Gemini request failed, falling back to smart procedural builder:', err);
+          generatedRecipe = synthesizeLocalRecipe(selectedIngredients, targetProtein, selectedAiMealType);
+        }
+      } else {
+        // Instant built-in synthesis
+        await new Promise(r => setTimeout(r, 600)); // Smooth UX pause
+        generatedRecipe = synthesizeLocalRecipe(selectedIngredients, targetProtein, selectedAiMealType);
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = `<i class="ph-bold ph-magic-wand text-lg"></i> <span>Synthesize Another</span>`;
+
+      // Save to custom recipe list
+      saveCustomRecipe(generatedRecipe);
+
+      // Display in modal
+      outputDiv.classList.remove('hidden');
+      outputDiv.innerHTML = `
+        <div class="flex justify-between items-start">
+          <h4 class="font-bold text-slate-900 text-sm">${generatedRecipe.title}</h4>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-protein/10 text-protein">${generatedRecipe.protein}g Protein</span>
+        </div>
+        <p class="text-[11px] text-slate-600">Calories: ~${generatedRecipe.calories} kcal • Ready in ${generatedRecipe.cookTime}m</p>
+        <div class="pt-1 text-slate-700 space-y-1">
+          <strong class="text-[11px] text-slate-800 uppercase block">Quick Prep:</strong>
+          <p class="text-xs leading-relaxed">${generatedRecipe.instructions.join(' ')}</p>
+        </div>
+        <div class="pt-2 flex gap-2">
+          <button onclick="closeCustomAIGenerator(); switchTab('recipes');" class="w-full py-2 bg-brand-600 text-white rounded-lg font-bold text-xs">
+            View in Recipe Feed
+          </button>
+        </div>
+      `;
+      showToast('New recipe crafted & saved!');
+    }
+
+    function synthesizeLocalRecipe(ingredients, targetProtein, mealType) {
+      const primary = ingredients[0] || 'Staples';
+      const secondary = ingredients[1] || 'Seasoning';
+      const title = `${mealType} ${primary} & ${secondary} Protein Skillet`;
+
+      return {
+        id: 'gen_' + Date.now(),
+        title: title,
+        category: mealType,
+        protein: targetProtein,
+        calories: Math.round(targetProtein * 4 + 180),
+        cookTime: 15,
+        kidFriendly: true,
+        highProtein: targetProtein >= 25,
+        tags: ['Custom Created', 'Zero Waste'],
+        requiredIngredients: ingredients.slice(0, 4),
+        instructions: [
+          `Heat a pan with 1 teaspoon of oil or cooking spray.`,
+          `Sauté ${primary} until aromatic, then combine with ${ingredients.slice(1).join(', ')}.`,
+          `Season with salt, pepper, and pantry spices to taste.`,
+          `Cook on medium heat for 8-10 minutes until tender and hot. Serve immediately.`
+        ]
+      };
+    }
+
+    async function fetchGeminiRecipe(key, ingredients, protein, mealType) {
+      const prompt = `You are an expert sports nutritionist and chef. Create one balanced ${mealType} recipe targeting ${protein}g protein using these ingredients: ${ingredients.join(', ')}. 
+Respond ONLY with a valid JSON object matching this schema:
+{
+  "title": "Recipe Name",
+  "protein": ${protein},
+  "calories": 400,
+  "cookTime": 15,
+  "requiredIngredients": ["${ingredients[0]}", ...],
+  "instructions": ["Step 1...", "Step 2..."]
+}`;
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseMimeType: "application/json" }
+        })
+      });
+
+      const data = await res.json();
+      const rawText = data.candidates[0].content.parts[0].text;
+      const parsed = JSON.parse(rawText);
+      return {
+        ...parsed,
+        id: 'gemini_' + Date.now(),
+        category: mealType,
+        kidFriendly: true,
+        highProtein: parsed.protein >= 25,
+        tags: ['Gemini AI Crafted']
+      };
+    }
+
+    function saveCustomRecipe(recipe) {
+      const stored = localStorage.getItem(STORAGE_KEY_CUSTOM_RECIPES);
+      let list = [];
+      if (stored) {
+        try { list = JSON.parse(stored); } catch(e) {}
+      }
+      list.unshift(recipe);
+      localStorage.setItem(STORAGE_KEY_CUSTOM_RECIPES, JSON.stringify(list));
+    }
+
+    // --- 9. SETTINGS & STORAGE CLEANUP ---
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function saveSettings() {
+      const key = document.getElementById('geminiApiKeyInput').value.trim();
+      localStorage.setItem(STORAGE_KEY_API, key);
+      closeSettingsModal();
+      showToast('Settings saved');
+    }
+
+    function clearAllData() {
+      localStorage.removeItem(STORAGE_KEY_PANTRY);
+      localStorage.removeItem(STORAGE_KEY_PROFILE);
+      localStorage.removeItem(STORAGE_KEY_CUSTOM_RECIPES);
+      localStorage.removeItem(STORAGE_KEY_API);
+      pantry = [...STARTER_PANTRY];
+      currentProfile = 'male';
+      savePantryToStorage();
+      closeSettingsModal();
+      initApp();
+      showToast('App reset to clean initial state');
+    }
+  </script>
+</body>
+</html>
