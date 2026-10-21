@@ -2,24 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#10b981" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#059669" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <title>NutriPantry — Smart Inventory, Protein & Micronutrients</title>
+  <title>NutriPantry — Comprehensive Macro & Micronutrient Clinical Tracker</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Phosphor Icons -->
   <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <!-- Google Fonts: Inter -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-y: none;
     }
@@ -33,109 +33,120 @@
     .safe-bottom {
       padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 16px));
     }
+    .progress-bar-glow {
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-  <!-- TOP APP BAR -->
   <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 py-3">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-2">
-        <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-200">
-          <i class="ph-bold ph-fork-knife text-lg"></i>
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md shadow-emerald-200">
+          <i class="ph-bold ph-dna text-lg"></i>
         </div>
         <div>
           <h1 class="text-lg font-bold tracking-tight text-slate-900 leading-none">NutriPantry</h1>
-          <p class="text-[11px] text-slate-500 font-medium">Protein, Vitamins & Minerals</p>
+          <p class="text-[11px] text-slate-500 font-medium">All 22+ Nutrients, Vitamins & Minerals</p>
         </div>
       </div>
-      <button onclick="openModal('settingsModal')" class="p-2 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-100 transition" aria-label="Settings">
-        <i class="ph-bold ph-gear text-xl"></i>
-      </button>
+      <div class="flex items-center gap-1.5">
+        <button onclick="openModal('dailyLogModal')" class="p-2 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-full transition relative" title="View Today's Consumed Nutrition">
+          <i class="ph-bold ph-chart-pie-slice text-lg"></i>
+          <span id="headerLoggedBadge" class="absolute -top-1 -right-1 bg-emerald-600 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center border-2 border-white hidden">0</span>
+        </button>
+        <button onclick="openModal('settingsModal')" class="p-2 text-slate-500 hover:text-slate-800 rounded-full hover:bg-slate-100 transition" aria-label="Settings">
+          <i class="ph-bold ph-gear text-xl"></i>
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- MAIN SCROLLABLE CONTAINER -->
   <main class="flex-1 max-w-md w-full mx-auto px-4 pt-4 safe-bottom">
 
-    <!-- PROFILE & DRI TARGET CARD -->
-    <section class="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-4 text-white shadow-lg shadow-emerald-900/10 mb-5 relative overflow-hidden">
-      <div class="absolute -right-6 -bottom-6 opacity-10 text-9xl">
-        <i class="ph-fill ph-heartbeat"></i>
+    <!-- PROFILE HERO & NUTRIENT METRICS CARD -->
+    <section class="bg-gradient-to-br from-emerald-700 via-teal-800 to-slate-900 rounded-3xl p-4 text-white shadow-xl shadow-emerald-950/20 mb-5 relative overflow-hidden">
+      <div class="absolute -right-8 -bottom-8 opacity-10 text-9xl">
+        <i class="ph-fill ph-pill"></i>
       </div>
 
       <div class="relative z-10">
-        <!-- Profile Switcher Tabs -->
+        <!-- Switcher Header -->
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs uppercase font-bold tracking-wider text-emerald-100">Active Profile</span>
+          <span class="text-xs uppercase font-extrabold tracking-wider text-emerald-300">Active Profile & DRI Standards</span>
           <button onclick="openEditWeightModal()" class="text-xs bg-white/20 hover:bg-white/30 backdrop-blur-md px-2.5 py-1 rounded-full font-semibold transition flex items-center gap-1">
-            <i class="ph-bold ph-pencil-simple"></i> Edit Weight & Goals
+            <i class="ph-bold ph-pencil-simple"></i> Edit Weight & Multipliers
           </button>
         </div>
 
-        <!-- Demographic Pill Selector -->
+        <!-- Demographic Profile Switcher -->
         <div class="flex gap-1.5 overflow-x-auto hide-scrollbar pb-2 mb-3">
-          <button onclick="switchProfile('infant')" id="btn-prof-infant" class="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition">
+          <button onclick="switchProfile('infant')" id="btn-prof-infant" class="px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition">
             👶 Infant (6-12m)
           </button>
-          <button onclick="switchProfile('toddler')" id="btn-prof-toddler" class="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition">
+          <button onclick="switchProfile('toddler')" id="btn-prof-toddler" class="px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition">
             🧒 Toddler (1-4y)
           </button>
-          <button onclick="switchProfile('child')" id="btn-prof-child" class="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition">
+          <button onclick="switchProfile('child')" id="btn-prof-child" class="px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition">
             👦 Child (4-12y)
           </button>
-          <button onclick="switchProfile('female')" id="btn-prof-female" class="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition">
+          <button onclick="switchProfile('female')" id="btn-prof-female" class="px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition">
             👩 Woman
           </button>
-          <button onclick="switchProfile('male')" id="btn-prof-male" class="px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap bg-white text-emerald-900 shadow-sm transition">
+          <button onclick="switchProfile('male')" id="btn-prof-male" class="px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap bg-white text-emerald-900 shadow-sm transition">
             👨 Man
           </button>
         </div>
 
-        <!-- Target Metrics Display -->
-        <div class="bg-black/15 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-          <div class="flex justify-between items-baseline mb-1">
-            <div class="flex items-center gap-2">
-              <span id="prof-name" class="font-bold text-sm tracking-wide">Adult Male</span>
-              <span id="prof-weight-badge" class="text-[11px] bg-white/20 px-2 py-0.5 rounded-full font-medium">70 kg</span>
+        <!-- Demographic Summary Container -->
+        <div class="bg-black/25 backdrop-blur-md rounded-2xl p-3 border border-white/15">
+          <div class="flex justify-between items-baseline mb-2">
+            <div>
+              <span id="prof-name" class="font-extrabold text-sm tracking-wide block">Adult Male</span>
+              <span id="prof-weight-badge" class="text-[11px] text-emerald-300 font-medium">70.0 kg • Moderate Activity</span>
             </div>
             <div class="text-right">
-              <span class="text-xs text-emerald-100">Daily Target: </span>
-              <span id="prof-target-protein" class="text-base font-extrabold text-white">70g</span>
-              <span class="text-xs font-normal text-emerald-200">protein</span>
+              <span class="text-[11px] text-slate-300">Daily Target: </span>
+              <span id="prof-target-protein" class="text-lg font-black text-white">70g</span>
+              <span class="text-xs font-medium text-emerald-300">protein</span>
             </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-white/10 text-center">
-            <div class="bg-white/10 rounded-lg py-1.5 px-1">
-              <p class="text-[10px] text-emerald-100">Meal Protein</p>
-              <p id="prof-meal-protein" class="text-xs font-bold mt-0.5">~23g</p>
+          <!-- Macro Quick Triad -->
+          <div class="grid grid-cols-3 gap-2 text-center pt-2 border-t border-white/10">
+            <div class="bg-white/10 rounded-xl py-1.5 px-1">
+              <p class="text-[10px] text-slate-300">Calories</p>
+              <p id="prof-cal" class="text-xs font-extrabold mt-0.5 text-amber-300">2,200 kcal</p>
             </div>
-            <div class="bg-white/10 rounded-lg py-1.5 px-1">
-              <p class="text-[10px] text-emerald-100">Est. Calories</p>
-              <p id="prof-cal" class="text-xs font-bold mt-0.5">~2,200</p>
+            <div class="bg-white/10 rounded-xl py-1.5 px-1">
+              <p class="text-[10px] text-slate-300">Fiber Target</p>
+              <p id="prof-fiber" class="text-xs font-extrabold mt-0.5 text-teal-200">38g / day</p>
             </div>
-            <div class="bg-white/10 rounded-lg py-1.5 px-1">
-              <p class="text-[10px] text-emerald-100">Guideline</p>
-              <p id="prof-tag" class="text-xs font-bold truncate mt-0.5">1.0g / kg</p>
+            <div class="bg-white/10 rounded-xl py-1.5 px-1">
+              <p class="text-[10px] text-slate-300">Meal Split</p>
+              <p id="prof-meal-protein" class="text-xs font-extrabold mt-0.5 text-emerald-300">~23g / meal</p>
+              <span id="prof-tag" class="hidden">1.0g / kg</span>
             </div>
           </div>
 
-          <!-- Key Micronutrient Daily Targets Row -->
+          <!-- Quick Micronutrient Highlights Preview -->
           <div class="mt-2.5 pt-2 border-t border-white/10">
-            <p class="text-[10px] uppercase font-bold text-emerald-100 tracking-wider mb-1.5 flex items-center justify-between">
-              <span>Daily Micronutrient Targets</span>
-              <span class="text-[9px] text-emerald-200 font-normal">RDA / AI</span>
-            </p>
+            <div class="flex items-center justify-between text-[10px] uppercase font-bold text-emerald-200 tracking-wider mb-1.5">
+              <span>Full Micronutrient RDA Preview</span>
+              <button onclick="openModal('allNutrientsTableModal')" class="text-white hover:text-emerald-300 underline lowercase font-semibold text-[10px]">
+                view all 22 values →
+              </button>
+            </div>
             <div class="grid grid-cols-4 gap-1.5 text-center" id="prof-micros-summary">
-              <!-- Populated via JS -->
+              <!-- Dynamically populated -->
             </div>
           </div>
 
-          <!-- Special feeding guidelines note for infants/toddlers -->
-          <div id="baby-feeding-note" class="hidden mt-2 p-2 bg-amber-500/20 border border-amber-300/30 rounded-lg text-[11px] text-amber-100 leading-snug">
+          <!-- Safety Warning for Toddler / Infant if active -->
+          <div id="baby-feeding-note" class="hidden mt-2.5 p-2 bg-amber-500/20 border border-amber-300/30 rounded-xl text-[11px] text-amber-100 leading-snug">
             <i class="ph-bold ph-warning-circle inline mr-1"></i>
-            <span id="baby-note-text">No honey or added salt under 12 months. Ensure soft textures & safe bite sizes.</span>
+            <span id="baby-note-text"></span>
           </div>
         </div>
       </div>
@@ -146,40 +157,40 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-base font-bold text-slate-900">Your Inventory</h2>
-          <p class="text-xs text-slate-500">Tap items to toggle in/out of stock</p>
+          <p class="text-xs text-slate-500">Toggle items in/out of stock</p>
         </div>
         <button onclick="openModal('addItemModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm shadow-emerald-600/30 transition">
-          <i class="ph-bold ph-plus"></i> Add Item
+          <i class="ph-bold ph-plus"></i> Add Custom
         </button>
       </div>
 
-      <!-- Quick Add Pills -->
+      <!-- Quick Staples Presets -->
       <div>
-        <p class="text-[11px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">Quick Presets</p>
+        <p class="text-[11px] uppercase font-bold tracking-wider text-slate-400 mb-1.5">Quick Staples Presets</p>
         <div class="flex flex-wrap gap-1.5" id="presetPillsContainer">
           <!-- Populated by JS -->
         </div>
       </div>
 
-      <!-- Inventory List Grouped by Category -->
+      <!-- Inventory Grouped List -->
       <div id="pantryContainer" class="space-y-3">
         <!-- Rendered via JS -->
       </div>
     </section>
 
-    <!-- TAB 2: RECIPE SUGGESTIONS -->
+    <!-- TAB 2: RECIPE SUGGESTIONS WITH NUTRITIONAL RATIOS -->
     <section id="view-recipes" class="space-y-4 hidden">
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-base font-bold text-slate-900">Targeted Recipes</h2>
-          <p class="text-xs text-slate-500" id="recipeSubtitle">Matching recipes to your pantry</p>
+          <p class="text-xs text-slate-500" id="recipeSubtitle">Matching recipes to your stock</p>
         </div>
         <button onclick="synthesizeAIRecipe()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow-sm shadow-indigo-600/30 transition">
-          <i class="ph-bold ph-sparkle"></i> AI Generate
+          <i class="ph-bold ph-sparkle"></i> Synthesize
         </button>
       </div>
 
-      <!-- Filter Chips -->
+      <!-- Comprehensive Filter Chips for Every Nutrient Dimension -->
       <div class="flex gap-2 overflow-x-auto hide-scrollbar pb-1">
         <button onclick="setRecipeFilter('all')" id="rf-all" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-600 text-white whitespace-nowrap transition">
           All Recipes
@@ -188,119 +199,77 @@
           ⚡ 100% In-Stock
         </button>
         <button onclick="setRecipeFilter('high-protein')" id="rf-high-protein" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap transition">
-          💪 High Protein (>20g)
+          🥩 High Protein (>20g)
         </button>
         <button onclick="setRecipeFilter('iron-rich')" id="rf-iron-rich" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap transition">
-          🩸 Iron Rich (>3mg)
+          🩸 High Iron (>3mg)
         </button>
         <button onclick="setRecipeFilter('calcium-rich')" id="rf-calcium-rich" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap transition">
           🦴 High Calcium (>200mg)
+        </button>
+        <button onclick="setRecipeFilter('immune-boost')" id="rf-immune-boost" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap transition">
+          🍊 Vit C + Zinc
         </button>
         <button onclick="setRecipeFilter('baby-safe')" id="rf-baby-safe" class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700 hover:bg-slate-300 whitespace-nowrap transition">
           👶 Baby/Toddler Safe
         </button>
       </div>
 
-      <!-- Recipe Cards Feed -->
+      <!-- Recipe Cards List -->
       <div id="recipesContainer" class="space-y-3">
         <!-- Rendered via JS -->
       </div>
     </section>
 
-    <!-- TAB 3: DRI NUTRITION GUIDE -->
+    <!-- TAB 3: DRI CLINICAL ENCYCLOPEDIA (ALL NUTRIENTS) -->
     <section id="view-guide" class="space-y-4 hidden">
       <div>
-        <h2 class="text-base font-bold text-slate-900">Nutritional Benchmarks</h2>
-        <p class="text-xs text-slate-500">Dietary Reference Intakes (DRI): Protein, Vitamins & Minerals</p>
+        <h2 class="text-base font-bold text-slate-900">Clinical DRI Nutrient Encyclopedia</h2>
+        <p class="text-xs text-slate-500">Every essential vitamin, mineral, and electrolyte explained</p>
       </div>
 
-      <!-- Quick Explainer for Micronutrients -->
-      <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-950 space-y-1">
-        <p class="font-bold flex items-center gap-1"><i class="ph-bold ph-sparkle text-emerald-600"></i> Why Micronutrients Matter:</p>
-        <p class="text-[11px] text-emerald-900 leading-relaxed">
-          While protein builds muscle and tissue, <strong>Iron</strong> delivers oxygen to brain & cells, <strong>Calcium & Vit D</strong> build strong bones, <strong>Zinc & Vit C</strong> power immune defense, and <strong>Vitamin A</strong> supports eyesight and cellular growth.
-        </p>
-      </div>
-
-      <div class="space-y-3">
-        <!-- Infants (6-12m) -->
-        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-1.5">
-            <span class="text-sm font-bold text-slate-800">Infant (6–12 months)</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~11g Protein</span>
+      <!-- Full Master RDA Matrix for Active Member -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900" id="guideProfileName">Active Target</h3>
+            <p class="text-[11px] text-slate-500">Official Daily Reference Intakes (DRI)</p>
           </div>
-          <p class="text-xs text-slate-600 mb-2">~1.2g/kg protein. Crucial transition window where infant iron stores deplete and require complementary dietary iron.</p>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 mb-2 font-medium">
-            <div>🩸 <strong>Iron:</strong> 11 mg/day (Crucial!)</div>
-            <div>🦴 <strong>Calcium:</strong> 260 mg/day</div>
-            <div>🛡️ <strong>Zinc:</strong> 3 mg/day</div>
-            <div>🍊 <strong>Vitamin C:</strong> 50 mg/day</div>
-          </div>
-          <div class="bg-amber-50 rounded-lg p-2 text-[11px] text-amber-800">
-            <strong>Baby Safety:</strong> Zero added salt or sugar. <strong>NO honey</strong> under 12 months (botulism risk). Safe textures: smooth purees or soft mashes.
-          </div>
+          <button onclick="openModal('allNutrientsTableModal')" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-bold">
+            Expand All 22+
+          </button>
         </div>
 
-        <!-- Toddlers (1-4y) -->
-        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-1.5">
-            <span class="text-sm font-bold text-slate-800">Toddler (1–4 years)</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~13–15g Protein</span>
+        <!-- Categorized Nutrient Panels -->
+        <div class="space-y-3 text-xs">
+          <!-- Minerals Group -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <h4 class="font-bold text-slate-800 flex items-center gap-1.5 mb-2">
+              <i class="ph-bold ph-shield-check text-rose-500"></i> Essential Minerals & Electrolytes
+            </h4>
+            <div class="grid grid-cols-2 gap-2 text-[11px]" id="guideMineralsGrid">
+              <!-- Injected dynamically -->
+            </div>
           </div>
-          <p class="text-xs text-slate-600 mb-2">High energy expenditure per kg. Supports bone elongation, teeth formation, and motor development.</p>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 mb-2 font-medium">
-            <div>🩸 <strong>Iron:</strong> 7 mg/day</div>
-            <div>🦴 <strong>Calcium:</strong> 700 mg/day</div>
-            <div>🛡️ <strong>Zinc:</strong> 3 mg/day</div>
-            <div>🍊 <strong>Vitamin C:</strong> 15 mg/day</div>
-          </div>
-          <div class="bg-slate-50 rounded-lg p-2 text-[11px] text-slate-600">
-            <strong>Textures:</strong> Graspable soft finger foods. Quarter whole grapes/cherry tomatoes to avoid choking hazards.
-          </div>
-        </div>
 
-        <!-- Children (4-12y) -->
-        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-1.5">
-            <span class="text-sm font-bold text-slate-800">Child (4–12 years)</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~19–34g Protein</span>
+          <!-- Vitamins Group -->
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <h4 class="font-bold text-slate-800 flex items-center gap-1.5 mb-2">
+              <i class="ph-bold ph-sparkle text-amber-500"></i> Essential Vitamins & Antioxidants
+            </h4>
+            <div class="grid grid-cols-2 gap-2 text-[11px]" id="guideVitaminsGrid">
+              <!-- Injected dynamically -->
+            </div>
           </div>
-          <p class="text-xs text-slate-600 mb-2">Peak childhood growth, cognitive stamina for school, and skeletal bone mineral accrual.</p>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 font-medium">
-            <div>🩸 <strong>Iron:</strong> 10 mg/day</div>
-            <div>🦴 <strong>Calcium:</strong> 1,000 mg/day</div>
-            <div>🛡️ <strong>Zinc:</strong> 5–8 mg/day</div>
-            <div>🍊 <strong>Vitamin C:</strong> 25–45 mg/day</div>
-          </div>
-        </div>
 
-        <!-- Adult Women -->
-        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-1.5">
-            <span class="text-sm font-bold text-slate-800">Adult Women</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~46–60g Protein</span>
-          </div>
-          <p class="text-xs text-slate-600 mb-2">High iron requirement to offset monthly menstrual losses, plus bone calcium preservation.</p>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 font-medium">
-            <div>🩸 <strong>Iron:</strong> 18 mg/day (Higher)</div>
-            <div>🦴 <strong>Calcium:</strong> 1,000 mg/day</div>
-            <div>🛡️ <strong>Zinc:</strong> 8 mg/day</div>
-            <div>🍊 <strong>Vitamin C:</strong> 75 mg/day</div>
-          </div>
-        </div>
-
-        <!-- Adult Men -->
-        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-1.5">
-            <span class="text-sm font-bold text-slate-800">Adult Men</span>
-            <span class="text-xs font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">~56–80g Protein</span>
-          </div>
-          <p class="text-xs text-slate-600 mb-2">Higher muscle mass maintenance, testosterone synthesis (zinc/magnesium), and cardiovascular support.</p>
-          <div class="grid grid-cols-2 gap-1.5 text-[11px] bg-slate-50 p-2 rounded-lg text-slate-700 font-medium">
-            <div>🩸 <strong>Iron:</strong> 8 mg/day</div>
-            <div>🦴 <strong>Calcium:</strong> 1,000 mg/day</div>
-            <div>🛡️ <strong>Zinc:</strong> 11 mg/day</div>
-            <div>🍊 <strong>Vitamin C:</strong> 90 mg/day</div>
+          <!-- Life Stage Specific Precautions -->
+          <div class="bg-amber-50/70 p-3 rounded-xl border border-amber-200 text-amber-900 text-xs space-y-1.5">
+            <p class="font-bold flex items-center gap-1"><i class="ph-bold ph-baby"></i> Infant & Toddler Critical Nutrients:</p>
+            <p class="text-[11px] leading-relaxed">
+              <strong>Iron (11mg):</strong> In infants 6–12 months, maternal iron stores are exhausted; dietary iron is strictly non-negotiable for cognitive synaptic pruning.<br/>
+              <strong>Zinc & Vitamin A:</strong> Essential for mucosal immunity and ocular tissue synthesis.<br/>
+              <strong>Zero Added Sodium:</strong> Immature infant kidneys cannot process added salt (< 400mg natural sodium/day).
+            </p>
           </div>
         </div>
       </div>
@@ -308,7 +277,6 @@
 
   </main>
 
-  <!-- BOTTOM MOBILE NAVIGATION BAR -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 pb-safe">
     <div class="max-w-md mx-auto grid grid-cols-3 py-2">
       <button onclick="switchTab('pantry')" id="nav-pantry" class="flex flex-col items-center justify-center py-1 text-emerald-600">
@@ -320,21 +288,177 @@
         <span class="text-[11px] font-semibold mt-0.5">Recipes</span>
       </button>
       <button onclick="switchTab('guide')" id="nav-guide" class="flex flex-col items-center justify-center py-1 text-slate-400 hover:text-slate-600">
-        <i class="ph-bold ph-chart-bar text-xl"></i>
-        <span class="text-[11px] font-semibold mt-0.5">Guide</span>
+        <i class="ph-bold ph-dna text-xl"></i>
+        <span class="text-[11px] font-semibold mt-0.5">Nutrient Guide</span>
       </button>
     </div>
   </nav>
 
-  <!-- ==================== MODALS ==================== -->
+  <!-- MODAL: RECIPE DETAIL WITH FULL 22+ NUTRIENT COUNTING -->
+  <div id="recipeDetailModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div>
+          <h3 id="modalRecipeTitle" class="font-bold text-slate-900 text-base leading-tight">Recipe Name</h3>
+          <p class="text-[11px] text-slate-400 font-medium" id="modalRecipeSub">Prep time & servings</p>
+        </div>
+        <button onclick="closeModal('recipeDetailModal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full">
+          <i class="ph-bold ph-x text-lg"></i>
+        </button>
+      </div>
 
-  <!-- EDIT WEIGHT & GOALS MODAL -->
+      <!-- Quick Action: Log to today's intake -->
+      <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
+        <div>
+          <span class="text-xs font-bold text-slate-800 block">Eaten Today?</span>
+          <span class="text-[11px] text-slate-500">Track these nutrients in your daily totals</span>
+        </div>
+        <button onclick="logCurrentRecipeToDaily()" id="btnLogMeal" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition">
+          <i class="ph-bold ph-plus-circle text-sm"></i> I Ate This
+        </button>
+      </div>
+
+      <!-- Macro Triple Stat Grid -->
+      <div class="grid grid-cols-4 gap-1.5 text-center">
+        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-2">
+          <p class="text-[9px] uppercase font-bold text-emerald-700">Protein</p>
+          <p id="modalRecipeProtein" class="text-base font-extrabold text-emerald-800">0g</p>
+        </div>
+        <div class="bg-amber-50 border border-amber-100 rounded-xl p-2">
+          <p class="text-[9px] uppercase font-bold text-amber-700">Calories</p>
+          <p id="modalRecipeCalories" class="text-base font-extrabold text-amber-800">0</p>
+        </div>
+        <div class="bg-teal-50 border border-teal-100 rounded-xl p-2">
+          <p class="text-[9px] uppercase font-bold text-teal-700">Fiber</p>
+          <p id="modalRecipeFiber" class="text-base font-extrabold text-teal-800">0g</p>
+        </div>
+        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-2">
+          <p class="text-[9px] uppercase font-bold text-indigo-700">Carbs</p>
+          <p id="modalRecipeCarbs" class="text-base font-extrabold text-indigo-800">0g</p>
+        </div>
+      </div>
+
+      <!-- COMPREHENSIVE NUTRIENT TAB SWITCHER IN MODAL -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1">
+            <i class="ph-bold ph-sparkle text-amber-500"></i> Full Clinical Nutrient Breakdown
+          </h4>
+          <span class="text-[10px] text-slate-400 font-medium">% of active profile RDA</span>
+        </div>
+
+        <!-- Nutrient Category Filter Buttons -->
+        <div class="flex gap-1 overflow-x-auto hide-scrollbar text-[11px] pb-1">
+          <button onclick="switchRecipeNutrientTab('all')" id="rnt-all" class="px-2.5 py-1 rounded-lg bg-slate-900 text-white font-semibold">All Nutrients</button>
+          <button onclick="switchRecipeNutrientTab('minerals')" id="rnt-minerals" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">Minerals</button>
+          <button onclick="switchRecipeNutrientTab('vitamins')" id="rnt-vitamins" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">Vitamins</button>
+          <button onclick="switchRecipeNutrientTab('macros')" id="rnt-macros" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium">Macros</button>
+        </div>
+
+        <!-- Rendered Full Nutrient Grid -->
+        <div class="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1" id="modalDetailedNutrientGrid">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Infant/Toddler Texture Warning (if applicable) -->
+      <div id="modalFeedingTextureGuidance" class="hidden bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-xs text-amber-900">
+        <p class="font-bold flex items-center gap-1"><i class="ph-bold ph-baby"></i> Texture & Feeding Safety:</p>
+        <p id="modalFeedingTextureText" class="text-[11px] mt-0.5 text-amber-800 leading-relaxed"></p>
+      </div>
+
+      <!-- Ingredients needed -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Ingredients Needed</h4>
+        <ul id="modalRecipeIngredients" class="space-y-1.5 text-xs text-slate-700">
+          <!-- Populated by JS -->
+        </ul>
+      </div>
+
+      <!-- Step directions -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Cooking Instructions</h4>
+        <ol id="modalRecipeSteps" class="list-decimal list-inside space-y-1.5 text-xs text-slate-700 leading-relaxed">
+          <!-- Populated by JS -->
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DAILY CONSUMED NUTRITION ACCUMULATOR -->
+  <div id="dailyLogModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Today's Nutrient Log</h3>
+          <p class="text-xs text-slate-500" id="dailyLogDate">Real-time RDA Fulfillment</p>
+        </div>
+        <button onclick="closeModal('dailyLogModal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full">
+          <i class="ph-bold ph-x text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Logged meals list -->
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Meals Logged (<span id="dailyLoggedCount">0</span>)</span>
+          <button onclick="clearDailyLog()" class="text-[11px] font-semibold text-rose-600 hover:underline">Reset Today</button>
+        </div>
+        <div id="dailyLoggedList" class="flex flex-wrap gap-1.5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Total Accrued Micronutrients vs Daily DRI Targets -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
+          <span>Target RDA Fulfillment Progress</span>
+          <span class="text-[10px] text-slate-400 font-normal">Updated live</span>
+        </h4>
+        <div class="space-y-2 max-h-72 overflow-y-auto pr-1" id="dailyAccumulatorProgressBars">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ALL 22+ CLINICAL NUTRIENTS TABLE -->
+  <div id="allNutrientsTableModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Complete Clinical DRI Reference</h3>
+          <p class="text-xs text-slate-500" id="tableModalSub">Targets for Active Member</p>
+        </div>
+        <button onclick="closeModal('allNutrientsTableModal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full">
+          <i class="ph-bold ph-x text-lg"></i>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 text-slate-400 uppercase text-[9px]">
+              <th class="py-2 font-bold">Nutrient / Mineral</th>
+              <th class="py-2 font-bold">Category</th>
+              <th class="py-2 font-bold text-right">Target RDA</th>
+            </tr>
+          </thead>
+          <tbody id="fullNutrientsTableBody" class="divide-y divide-slate-100 text-slate-700">
+            <!-- Injected via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT WEIGHT & MULTIPLIERS -->
   <div id="editWeightModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
         <div>
-          <h3 class="font-bold text-slate-900 text-base" id="editModalTitle">Edit Profile & Goals</h3>
-          <p class="text-xs text-slate-500">Fine-tune targets for this profile</p>
+          <h3 class="font-bold text-slate-900 text-base" id="editModalTitle">Edit Profile & Weight</h3>
+          <p class="text-xs text-slate-500">Recalculates all nutrients automatically</p>
         </div>
         <button onclick="closeModal('editWeightModal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full">
           <i class="ph-bold ph-x text-lg"></i>
@@ -342,19 +466,17 @@
       </div>
 
       <form id="weightForm" onsubmit="saveCustomProfileWeight(event)" class="space-y-4">
-        <!-- Weight Input -->
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Body Weight (kg)</label>
           <div class="relative">
             <input type="number" step="0.1" id="input-prof-weight" required min="3" max="250" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 pr-12" />
             <span class="absolute right-3 top-2.5 text-xs font-bold text-slate-400">KG</span>
           </div>
-          <p class="text-[11px] text-slate-400 mt-1" id="weight-help-text">Standard weight baseline for this age category.</p>
+          <p class="text-[11px] text-slate-400 mt-1" id="weight-help-text"></p>
         </div>
 
-        <!-- Activity Multiplier -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Activity / Growth Factor</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Activity / Metabolic Demand Factor</label>
           <select id="input-prof-activity" onchange="previewRecalculatedProtein()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
             <option value="sedentary">Sedentary / Baseline DRI (0.8–1.0 g/kg)</option>
             <option value="moderate" selected>Moderately Active / Standard Growth (1.0–1.2 g/kg)</option>
@@ -362,9 +484,8 @@
           </select>
         </div>
 
-        <!-- Live Calculated Preview Box -->
         <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
-          <p class="text-xs text-emerald-800 font-medium">Resulting Daily Target</p>
+          <p class="text-xs text-emerald-800 font-medium">Recalculated Protein & Calorie Goal</p>
           <div class="flex items-baseline justify-center gap-1 mt-1">
             <span id="preview-protein" class="text-2xl font-extrabold text-emerald-700">70</span>
             <span class="text-xs font-bold text-emerald-700">grams protein / day</span>
@@ -372,27 +493,19 @@
           <p class="text-[11px] text-emerald-600 mt-0.5" id="preview-meal-split">~23g per main meal</p>
         </div>
 
-        <!-- Micronutrient RDA breakdown in modal -->
-        <div class="border border-slate-200 rounded-xl p-3 bg-slate-50">
-          <p class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Standard Daily Micronutrients (RDA)</p>
-          <div class="grid grid-cols-2 gap-2 text-xs" id="edit-modal-micros-list">
-            <!-- Populated dynamically -->
-          </div>
-        </div>
-
         <div class="flex gap-2 pt-2">
           <button type="button" onclick="resetCurrentProfileToDefaults()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-3 rounded-xl transition">
             Reset RDA
           </button>
           <button type="submit" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-3 rounded-xl shadow-md shadow-emerald-600/30 transition">
-            Save Goals
+            Save & Recalculate
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- ADD ITEM MODAL -->
+  <!-- MODAL: ADD CUSTOM PANTRY ITEM -->
   <div id="addItemModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
@@ -405,18 +518,18 @@
       <form id="addItemForm" onsubmit="handleManualAddItem(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Ingredient Name</label>
-          <input type="text" id="manualItemName" placeholder="e.g. Paneer, Tofu, Oats, Sweet Potato" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <input type="text" id="manualItemName" placeholder="e.g. Edamame, Chia Seeds, Salmon, Tofu" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Category</label>
             <select id="manualItemCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <option value="protein">🥩 Protein</option>
-              <option value="vegetables">🥦 Produce</option>
-              <option value="dairy">🥛 Dairy/Plant Milk</option>
-              <option value="carbs">🍚 Carbs & Grains</option>
-              <option value="staples">🧂 Pantry Staple</option>
+              <option value="protein">🥩 Protein Source</option>
+              <option value="vegetables">🥦 Produce & Greens</option>
+              <option value="dairy">🥛 Dairy / Plant Milk</option>
+              <option value="carbs">🍚 Whole Grains & Carbs</option>
+              <option value="staples">🧂 Healthy Fats & Staples</option>
             </select>
           </div>
           <div>
@@ -432,72 +545,11 @@
     </div>
   </div>
 
-  <!-- RECIPE DETAIL MODAL (WITH MICRONUTRIENTS) -->
-  <div id="recipeDetailModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
-    <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 id="modalRecipeTitle" class="font-bold text-slate-900 text-base">Recipe Name</h3>
-        <button onclick="closeModal('recipeDetailModal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full">
-          <i class="ph-bold ph-x text-lg"></i>
-        </button>
-      </div>
-
-      <div class="flex flex-wrap gap-2 text-xs" id="modalRecipeTags">
-        <!-- Rendered tags -->
-      </div>
-
-      <!-- Macro split box -->
-      <div class="bg-emerald-50 rounded-xl p-3 border border-emerald-100 flex justify-between items-center text-emerald-900">
-        <div>
-          <p class="text-[10px] uppercase font-bold text-emerald-700">Protein per serving</p>
-          <p id="modalRecipeProtein" class="text-xl font-extrabold text-emerald-800">0g</p>
-        </div>
-        <div class="text-right">
-          <p class="text-[10px] uppercase font-bold text-emerald-700" id="modalMealTargetLabel">Fulfills Meal Goal</p>
-          <p id="modalMealPercentage" class="text-base font-bold text-emerald-800">0%</p>
-        </div>
-      </div>
-
-      <!-- MICRONUTRIENTS CARD -->
-      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-        <div class="flex justify-between items-center mb-2">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1">
-            <i class="ph-bold ph-sparkle text-amber-500"></i> Micronutrient Breakdown
-          </h4>
-          <span class="text-[10px] text-slate-400">% of daily target</span>
-        </div>
-        <div class="grid grid-cols-2 gap-2" id="modalMicronutrientsGrid">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-
-      <!-- Infant/Toddler Texture Warning (if applicable) -->
-      <div id="modalFeedingTextureGuidance" class="hidden bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-xs text-amber-900">
-        <p class="font-bold flex items-center gap-1"><i class="ph-bold ph-baby"></i> Texture & Baby Safety:</p>
-        <p id="modalFeedingTextureText" class="text-[11px] mt-0.5 text-amber-800">Ensure food is tested lukewarm. Mash thoroughly or cut into graspable strips.</p>
-      </div>
-
-      <div>
-        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Ingredients Needed</h4>
-        <ul id="modalRecipeIngredients" class="space-y-1.5 text-xs text-slate-700">
-          <!-- Populated by JS -->
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Step-by-Step Directions</h4>
-        <ol id="modalRecipeSteps" class="list-decimal list-inside space-y-1.5 text-xs text-slate-700 leading-relaxed">
-          <!-- Populated by JS -->
-        </ol>
-      </div>
-    </div>
-  </div>
-
-  <!-- SETTINGS MODAL -->
+  <!-- MODAL: SETTINGS -->
   <div id="settingsModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
     <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl space-y-4">
       <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-        <h3 class="font-bold text-slate-900 text-base">App Settings</h3>
+        <h3 class="font-bold text-slate-900 text-base">App Settings & AI Key</h3>
         <button onclick="closeModal('settingsModal')" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-full">
           <i class="ph-bold ph-x text-lg"></i>
         </button>
@@ -505,9 +557,9 @@
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Optional Gemini API Key</label>
+          <label class="block font-bold text-slate-700 uppercase tracking-wider mb-1">Gemini API Key (Optional)</label>
           <input type="password" id="geminiApiKey" placeholder="AIzaSy..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <p class="text-[10px] text-slate-400 mt-1">Leave empty to use built-in offline recipe synthesis without API calls.</p>
+          <p class="text-[10px] text-slate-400 mt-1">Leave empty to use built-in offline clinical procedural engine without API keys.</p>
         </div>
 
         <div class="pt-2">
@@ -519,108 +571,138 @@
     </div>
   </div>
 
-  <!-- ==================== JAVASCRIPT APP LOGIC ==================== -->
   <script>
-    // --- 1. DEFAULT PROFILES DATA WITH FULL MICRONUTRIENTS (RDA / AI) ---
+    // --- 1. MASTER NUTRIENT TAXONOMY (22+ CLINICALLY MONITORED NUTRIENTS) ---
+    const NUTRIENT_DEFINITIONS = {
+      // MACROS & FIBER
+      protein: { name: 'Protein', unit: 'g', cat: 'macro', icon: '🥩' },
+      calories: { name: 'Energy', unit: 'kcal', cat: 'macro', icon: '⚡' },
+      carbs: { name: 'Carbohydrates', unit: 'g', cat: 'macro', icon: '🍚' },
+      fiber: { name: 'Dietary Fiber', unit: 'g', cat: 'macro', icon: '🌾' },
+      fats: { name: 'Total Fats', unit: 'g', cat: 'macro', icon: '🥑' },
+      
+      // ESSENTIAL MINERALS & ELECTROLYTES
+      iron: { name: 'Iron', unit: 'mg', cat: 'mineral', icon: '🩸' },
+      calcium: { name: 'Calcium', unit: 'mg', cat: 'mineral', icon: '🦴' },
+      magnesium: { name: 'Magnesium', unit: 'mg', cat: 'mineral', icon: '🔋' },
+      zinc: { name: 'Zinc', unit: 'mg', cat: 'mineral', icon: '🛡️' },
+      potassium: { name: 'Potassium', unit: 'mg', cat: 'mineral', icon: '🍌' },
+      sodium: { name: 'Sodium', unit: 'mg', cat: 'mineral', icon: '🧂' },
+      phosphorus: { name: 'Phosphorus', unit: 'mg', cat: 'mineral', icon: '⚙️' },
+      selenium: { name: 'Selenium', unit: 'mcg', cat: 'mineral', icon: '✨' },
+      iodine: { name: 'Iodine', unit: 'mcg', cat: 'mineral', icon: '🌊' },
+      copper: { name: 'Copper', unit: 'mg', cat: 'mineral', icon: '🪙' },
+
+      // VITAMINS & CHOLINE
+      vitA: { name: 'Vitamin A (RAE)', unit: 'mcg', cat: 'vitamin', icon: '🥕' },
+      vitC: { name: 'Vitamin C', unit: 'mg', cat: 'vitamin', icon: '🍊' },
+      vitD: { name: 'Vitamin D', unit: 'mcg', cat: 'vitamin', icon: '☀️' },
+      vitE: { name: 'Vitamin E', unit: 'mg', cat: 'vitamin', icon: '🌻' },
+      vitK: { name: 'Vitamin K', unit: 'mcg', cat: 'vitamin', icon: '🥬' },
+      thiamine: { name: 'Thiamine (B1)', unit: 'mg', cat: 'vitamin', icon: '🥖' },
+      riboflavin: { name: 'Riboflavin (B2)', unit: 'mg', cat: 'vitamin', icon: '🥚' },
+      niacin: { name: 'Niacin (B3)', unit: 'mg', cat: 'vitamin', icon: '🍄' },
+      vitB6: { name: 'Vitamin B6', unit: 'mg', cat: 'vitamin', icon: '🥔' },
+      folate: { name: 'Folate (B9)', unit: 'mcg', cat: 'vitamin', icon: '🌱' },
+      vitB12: { name: 'Vitamin B12', unit: 'mcg', cat: 'vitamin', icon: '🐟' },
+      choline: { name: 'Choline', unit: 'mg', cat: 'vitamin', icon: '🧠' }
+    };
+
+    // --- 2. DEMOGRAPHIC CLINICAL PROFILES & DRI BENCHMARKS ---
     const DEFAULT_PROFILES = {
       infant: {
         id: 'infant',
         label: '👶 Infant (6-12m)',
         name: 'Infant (6–12 months)',
-        weight: 9.0, // kg
-        baseFactor: 1.2, // ~1.2 g/kg
+        weight: 9.0,
+        baseFactor: 1.2,
         proteinTarget: 11,
         calories: 750,
         activity: 'moderate',
         tag: '~1.2g / kg',
-        safetyNote: 'No honey or added salt under 12 months. Introduce smooth purees or soft mashes.',
-        micros: {
-          iron: { val: 11, unit: 'mg', name: 'Iron' },
-          calcium: { val: 260, unit: 'mg', name: 'Calcium' },
-          vitC: { val: 50, unit: 'mg', name: 'Vit C' },
-          vitA: { val: 500, unit: 'mcg', name: 'Vit A' },
-          zinc: { val: 3, unit: 'mg', name: 'Zinc' },
-          potassium: { val: 860, unit: 'mg', name: 'Potassium' }
+        safetyNote: 'Strictly zero added salt (<400mg natural sodium) or honey. Iron is the #1 developmental priority.',
+        nutrients: {
+          protein: 11, calories: 750, carbs: 95, fiber: 5, fats: 30,
+          iron: 11, calcium: 260, magnesium: 75, zinc: 3, potassium: 860, sodium: 370,
+          phosphorus: 275, selenium: 20, iodine: 130, copper: 0.22,
+          vitA: 500, vitC: 50, vitD: 10, vitE: 5, vitK: 2.5,
+          thiamine: 0.3, riboflavin: 0.4, niacin: 4, vitB6: 0.3, folate: 80, vitB12: 0.5, choline: 150
         }
       },
       toddler: {
         id: 'toddler',
         label: '🧒 Toddler (1-4y)',
         name: 'Toddler (1–4 years)',
-        weight: 13.5, // kg
+        weight: 13.5,
         baseFactor: 1.05,
         proteinTarget: 14,
         calories: 1100,
         activity: 'moderate',
         tag: '~1.05g / kg',
-        safetyNote: 'Choking prevention: quarter round fruits (grapes/cherries). Soft, graspable finger foods.',
-        micros: {
-          iron: { val: 7, unit: 'mg', name: 'Iron' },
-          calcium: { val: 700, unit: 'mg', name: 'Calcium' },
-          vitC: { val: 15, unit: 'mg', name: 'Vit C' },
-          vitA: { val: 300, unit: 'mcg', name: 'Vit A' },
-          zinc: { val: 3, unit: 'mg', name: 'Zinc' },
-          potassium: { val: 2000, unit: 'mg', name: 'Potassium' }
+        safetyNote: 'High calcium and zinc for tooth and bone matrix elongation. Graspable soft finger textures.',
+        nutrients: {
+          protein: 14, calories: 1100, carbs: 130, fiber: 19, fats: 35,
+          iron: 7, calcium: 700, magnesium: 80, zinc: 3, potassium: 2000, sodium: 1000,
+          phosphorus: 460, selenium: 20, iodine: 90, copper: 0.34,
+          vitA: 300, vitC: 15, vitD: 15, vitE: 6, vitK: 30,
+          thiamine: 0.5, riboflavin: 0.5, niacin: 6, vitB6: 0.5, folate: 150, vitB12: 0.9, choline: 200
         }
       },
       child: {
         id: 'child',
         label: '👦 Child (4-12y)',
         name: 'Child (4–12 years)',
-        weight: 28.0, // kg
+        weight: 28.0,
         baseFactor: 0.95,
         proteinTarget: 27,
         calories: 1600,
         activity: 'moderate',
         tag: '~0.95g / kg',
-        safetyNote: '',
-        micros: {
-          iron: { val: 10, unit: 'mg', name: 'Iron' },
-          calcium: { val: 1000, unit: 'mg', name: 'Calcium' },
-          vitC: { val: 35, unit: 'mg', name: 'Vit C' },
-          vitA: { val: 450, unit: 'mcg', name: 'Vit A' },
-          zinc: { val: 5, unit: 'mg', name: 'Zinc' },
-          potassium: { val: 2300, unit: 'mg', name: 'Potassium' }
+        safetyNote: 'Supports rapid skeletal growth, attention, and cognitive scholastic stamina.',
+        nutrients: {
+          protein: 27, calories: 1600, carbs: 180, fiber: 25, fats: 50,
+          iron: 10, calcium: 1000, magnesium: 130, zinc: 5, potassium: 2300, sodium: 1500,
+          phosphorus: 500, selenium: 30, iodine: 120, copper: 0.44,
+          vitA: 450, vitC: 35, vitD: 15, vitE: 9, vitK: 55,
+          thiamine: 0.7, riboflavin: 0.8, niacin: 9, vitB6: 0.7, folate: 200, vitB12: 1.2, choline: 280
         }
       },
       female: {
         id: 'female',
         label: '👩 Woman',
         name: 'Adult Female',
-        weight: 60.0, // kg
+        weight: 60.0,
         baseFactor: 0.85,
         proteinTarget: 51,
         calories: 1850,
         activity: 'moderate',
         tag: '~0.85g / kg',
-        safetyNote: '',
-        micros: {
-          iron: { val: 18, unit: 'mg', name: 'Iron' },
-          calcium: { val: 1000, unit: 'mg', name: 'Calcium' },
-          vitC: { val: 75, unit: 'mg', name: 'Vit C' },
-          vitA: { val: 700, unit: 'mcg', name: 'Vit A' },
-          zinc: { val: 8, unit: 'mg', name: 'Zinc' },
-          potassium: { val: 2600, unit: 'mg', name: 'Potassium' }
+        safetyNote: 'Increased iron requirements (18mg) to balance blood loss, plus bone calcium preservation.',
+        nutrients: {
+          protein: 51, calories: 1850, carbs: 210, fiber: 28, fats: 60,
+          iron: 18, calcium: 1000, magnesium: 310, zinc: 8, potassium: 2600, sodium: 2000,
+          phosphorus: 700, selenium: 55, iodine: 150, copper: 0.9,
+          vitA: 700, vitC: 75, vitD: 15, vitE: 15, vitK: 90,
+          thiamine: 1.1, riboflavin: 1.1, niacin: 14, vitB6: 1.3, folate: 400, vitB12: 2.4, choline: 425
         }
       },
       male: {
         id: 'male',
         label: '👨 Man',
         name: 'Adult Male',
-        weight: 70.0, // kg
+        weight: 70.0,
         baseFactor: 1.0,
         proteinTarget: 70,
         calories: 2200,
         activity: 'moderate',
         tag: '~1.0g / kg',
-        safetyNote: '',
-        micros: {
-          iron: { val: 8, unit: 'mg', name: 'Iron' },
-          calcium: { val: 1000, unit: 'mg', name: 'Calcium' },
-          vitC: { val: 90, unit: 'mg', name: 'Vit C' },
-          vitA: { val: 900, unit: 'mcg', name: 'Vit A' },
-          zinc: { val: 11, unit: 'mg', name: 'Zinc' },
-          potassium: { val: 3400, unit: 'mg', name: 'Potassium' }
+        safetyNote: 'Higher protein, zinc, and magnesium for muscle preservation and endocrine equilibrium.',
+        nutrients: {
+          protein: 70, calories: 2200, carbs: 260, fiber: 38, fats: 70,
+          iron: 8, calcium: 1000, magnesium: 400, zinc: 11, potassium: 3400, sodium: 2200,
+          phosphorus: 700, selenium: 55, iodine: 150, copper: 0.9,
+          vitA: 900, vitC: 90, vitD: 15, vitE: 15, vitK: 120,
+          thiamine: 1.2, riboflavin: 1.3, niacin: 16, vitB6: 1.7, folate: 400, vitB12: 2.4, choline: 550
         }
       }
     };
@@ -634,205 +716,177 @@
       active: 1.3
     };
 
-    // --- 2. RECIPES WITH PROTEIN + MICRONUTRIENTS (Vitamins & Minerals) ---
+    // --- 3. MASTER RECIPE DATABASE WITH EXACT NUTRIENT QUANTITIES ---
     const RECIPE_DATABASE = [
       {
         id: 'r_lentil_mash',
         title: 'Golden Lentil & Carrot Puree/Mash',
-        protein: 7,
-        calories: 140,
         prepTime: '15m',
         babySafe: true,
-        texture: 'Smooth Puree or Fork-Mashed (6+ months)',
-        safetyTip: 'No added salt or whole spices. High in Vitamin A and plant-based iron.',
-        micros: {
-          iron: 2.8,       // mg
-          calcium: 38,     // mg
-          vitC: 9,         // mg
-          vitA: 450,       // mcg (carotene)
-          zinc: 1.2,       // mg
-          potassium: 360   // mg
+        texture: 'Silky Puree or Fork-Mashed (6+ mos)',
+        safetyTip: 'No added salt or whole spices. High in Vitamin A, Folate, and non-heme Iron.',
+        nutrients: {
+          protein: 7.2, calories: 145, carbs: 24, fiber: 6.2, fats: 1.8,
+          iron: 2.8, calcium: 38, magnesium: 36, zinc: 1.2, potassium: 390, sodium: 24,
+          phosphorus: 120, selenium: 5.5, iodine: 2.5, copper: 0.22,
+          vitA: 450, vitC: 9.2, vitD: 0, vitE: 1.1, vitK: 12,
+          thiamine: 0.18, riboflavin: 0.08, niacin: 1.1, vitB6: 0.22, folate: 140, vitB12: 0, choline: 32
         },
         required: ['Lentils / Dal', 'Carrots'],
         optional: ['Rice'],
         steps: [
-          'Rinse yellow lentils and peel/dice carrots into small cubes.',
-          'Boil together in water for 15 minutes until very soft and tender.',
-          'Fork-mash or blend with a splash of warm water to baby-appropriate consistency.'
+          'Rinse yellow lentils and peel/dice carrots into small coins.',
+          'Boil together in water for 15 minutes until tender and soft.',
+          'Blend silky smooth for 6m+, or fork-mash for 9m+ to practice chewing.'
         ]
       },
       {
         id: 'r_soft_scramble',
         title: 'Pillow-Soft Egg & Steamed Spinach Mash',
-        protein: 8,
-        calories: 110,
         prepTime: '8m',
         babySafe: true,
-        texture: 'Soft, melt-in-mouth curds (9+ months)',
-        safetyTip: 'Ensure egg is cooked completely through without crisp edges. Rich in Iron, Choline, and Vitamin A.',
-        micros: {
-          iron: 1.9,
-          calcium: 75,
-          vitC: 8,
-          vitA: 280,
-          zinc: 0.9,
-          potassium: 220
+        texture: 'Soft, melt-in-mouth curds (9+ mos)',
+        safetyTip: 'Ensure egg is completely set. Rich in Choline, Vitamin B12, and Lutein.',
+        nutrients: {
+          protein: 8.4, calories: 115, carbs: 2.1, fiber: 1.2, fats: 7.8,
+          iron: 1.9, calcium: 78, magnesium: 28, zinc: 0.95, potassium: 230, sodium: 95,
+          phosphorus: 110, selenium: 16.2, iodine: 24, copper: 0.12,
+          vitA: 290, vitC: 8.5, vitD: 1.1, vitE: 1.8, vitK: 145,
+          thiamine: 0.06, riboflavin: 0.24, niacin: 0.4, vitB6: 0.15, folate: 72, vitB12: 0.75, choline: 160
         },
         required: ['Eggs', 'Spinach'],
         optional: [],
         steps: [
-          'Finely chop fresh spinach leaves.',
-          'Whisk 1 egg thoroughly with 1 tbsp warm water or milk.',
-          'Gently scramble in a non-stick pan on low heat until soft curds form completely.'
+          'Finely mince fresh baby spinach.',
+          'Whisk 1 whole egg thoroughly with 1 tbsp warm water or milk.',
+          'Gently fold in a non-stick pan on low heat until soft curds set thoroughly.'
         ]
       },
       {
         id: 'r_banana_oats',
-        title: 'Banana & Greek Yogurt Baby Porridge',
-        protein: 9,
-        calories: 170,
+        title: 'Banana & Greek Yogurt Power Porridge',
         prepTime: '6m',
         babySafe: true,
-        texture: 'Smooth creamy spoon food (6+ months)',
-        safetyTip: 'Naturally sweetened by ripe banana. Delivers high Calcium and Potassium.',
-        micros: {
-          iron: 1.1,
-          calcium: 160,
-          vitC: 7,
-          vitA: 35,
-          zinc: 0.8,
-          potassium: 420
+        texture: 'Smooth creamy spoon food (6+ mos)',
+        safetyTip: 'Sweetened only with banana. Natural source of Calcium, Magnesium, and Potassium.',
+        nutrients: {
+          protein: 10.5, calories: 185, carbs: 32, fiber: 4.1, fats: 2.4,
+          iron: 1.2, calcium: 175, magnesium: 44, zinc: 0.85, potassium: 450, sodium: 45,
+          phosphorus: 160, selenium: 9.5, iodine: 18, copper: 0.15,
+          vitA: 38, vitC: 7.2, vitD: 0.2, vitE: 0.4, vitK: 2.1,
+          thiamine: 0.15, riboflavin: 0.22, niacin: 1.2, vitB6: 0.35, folate: 38, vitB12: 0.6, choline: 22
         },
         required: ['Oats', 'Greek Yogurt', 'Banana'],
         optional: [],
         steps: [
-          'Cook 3 tablespoons of rolled oats in water until soft and creamy.',
-          'Allow to cool until lukewarm, then stir in 2 tablespoons of Greek yogurt.',
-          'Mash 1/2 ripe banana with a fork and fold in completely.'
+          'Simmer rolled oats in water for 5 minutes until soft.',
+          'Let cool to lukewarm, then fold in plain Greek yogurt and mashed banana.'
         ]
       },
       {
         id: 'r_sweetpotato_chickpea',
         title: 'Sweet Potato & Chickpea Soft Medallions',
-        protein: 11,
-        calories: 210,
         prepTime: '20m',
         babySafe: true,
-        texture: 'Graspable soft finger food (1–4 years)',
-        safetyTip: 'Patties should be squishable between fingers. Rich in Vitamin A, Zinc, and fiber.',
-        micros: {
-          iron: 2.6,
-          calcium: 68,
-          vitC: 14,
-          vitA: 520,
-          zinc: 1.8,
-          potassium: 490
+        texture: 'Graspable soft finger food (1–4 yrs)',
+        safetyTip: 'Squishable between fingers. High in Beta-carotene, Zinc, and Potassium.',
+        nutrients: {
+          protein: 11.8, calories: 225, carbs: 42, fiber: 7.8, fats: 3.2,
+          iron: 2.7, calcium: 74, magnesium: 58, zinc: 1.9, potassium: 520, sodium: 88,
+          phosphorus: 170, selenium: 6.8, iodine: 4.5, copper: 0.36,
+          vitA: 560, vitC: 15.5, vitD: 0, vitE: 1.6, vitK: 16,
+          thiamine: 0.22, riboflavin: 0.12, niacin: 1.8, vitB6: 0.45, folate: 110, vitB12: 0, choline: 45
         },
         required: ['Sweet Potato', 'Chickpeas'],
         optional: ['Oats'],
         steps: [
           'Steam sweet potato and chickpeas until fork-tender.',
-          'Mash thoroughly together with a pinch of cumin (optional).',
-          'Form into silver-dollar patties and lightly warm on a griddle for 2 minutes each side until set.'
+          'Mash together thoroughly, form small silver-dollar patties, and lightly warm in a skillet.'
         ]
       },
       {
         id: 'r_paneer_scramble',
         title: 'High-Protein Paneer Bhurji with Spinach',
-        protein: 26,
-        calories: 340,
         prepTime: '12m',
         babySafe: false,
         texture: 'Savory scramble',
-        safetyTip: 'Exceptional source of bioavailable dietary Calcium and Iron from spinach.',
-        micros: {
-          iron: 3.4,
-          calcium: 480,
-          vitC: 18,
-          vitA: 340,
-          zinc: 2.4,
-          potassium: 380
+        safetyTip: 'Exceptional source of bioavailable Calcium, Phosphorus, and Vitamin A.',
+        nutrients: {
+          protein: 26.5, calories: 345, carbs: 9.5, fiber: 3.8, fats: 22,
+          iron: 3.5, calcium: 490, magnesium: 65, zinc: 2.6, potassium: 395, sodium: 310,
+          phosphorus: 380, selenium: 18.5, iodine: 32, copper: 0.28,
+          vitA: 360, vitC: 18.2, vitD: 0.4, vitE: 2.4, vitK: 165,
+          thiamine: 0.16, riboflavin: 0.38, niacin: 1.9, vitB6: 0.32, folate: 95, vitB12: 1.1, choline: 48
         },
         required: ['Paneer / Cottage Cheese', 'Spinach', 'Tomatoes'],
         optional: ['Eggs'],
         steps: [
-          'Sauté diced tomatoes and spices in a pan with a drop of oil.',
-          'Fold in shredded spinach until wilted.',
-          'Crumble fresh paneer, combine well for 3 minutes, and serve hot.'
+          'Sauté diced tomatoes in olive oil or ghee until tender.',
+          'Add chopped spinach and crumble fresh paneer.',
+          'Cook on medium heat for 3–4 minutes until fragrant.'
         ]
       },
       {
         id: 'r_dal_khichdi',
         title: 'Wholesome Lentil Khichdi Bowl',
-        protein: 18,
-        calories: 360,
         prepTime: '20m',
         babySafe: true,
-        texture: 'Soft comforting porridge-rice',
-        safetyTip: 'Balanced vegetarian complete protein profile, rich in Iron, Folate, and Zinc.',
-        micros: {
-          iron: 4.2,
-          calcium: 64,
-          vitC: 6,
-          vitA: 190,
-          zinc: 2.7,
-          potassium: 440
+        texture: 'Comforting porridge-rice',
+        safetyTip: 'Complete vegetarian protein. High in Iron, Magnesium, and B-complex vitamins.',
+        nutrients: {
+          protein: 18.2, calories: 365, carbs: 64, fiber: 9.5, fats: 5.4,
+          iron: 4.4, calcium: 68, magnesium: 88, zinc: 2.8, potassium: 460, sodium: 180,
+          phosphorus: 260, selenium: 14.5, iodine: 8.5, copper: 0.45,
+          vitA: 195, vitC: 6.8, vitD: 0, vitE: 1.2, vitK: 24,
+          thiamine: 0.38, riboflavin: 0.18, niacin: 3.2, vitB6: 0.48, folate: 185, vitB12: 0, choline: 54
         },
         required: ['Lentils / Dal', 'Rice'],
         optional: ['Spinach', 'Carrots'],
         steps: [
-          'Wash equal parts lentils and rice.',
-          'Pressure cook or simmer with 3.5x water, turmeric, and pinch of cumin for 15 minutes.',
-          'Finish with a spoonful of ghee for healthy fats.'
+          'Wash lentils and rice; pressure cook or simmer with 3.5x water, turmeric, and cumin.',
+          'Finish with a spoonful of ghee for essential fatty acid absorption.'
         ]
       },
       {
         id: 'r_greek_yogurt_bowl',
         title: 'Greek Yogurt Power Parfait',
-        protein: 23,
-        calories: 280,
         prepTime: '3m',
         babySafe: false,
         texture: 'Cold breakfast bowl',
-        safetyTip: 'Bone-building Calcium powerhouse with quick potassium boost from banana.',
-        micros: {
-          iron: 1.4,
-          calcium: 280,
-          vitC: 10,
-          vitA: 40,
-          zinc: 1.3,
-          potassium: 540
+        safetyTip: 'Bone-mineral accrual powerhouse with B12, Potassium, and Calcium.',
+        nutrients: {
+          protein: 23.5, calories: 285, carbs: 36, fiber: 4.5, fats: 4.2,
+          iron: 1.4, calcium: 290, magnesium: 52, zinc: 1.4, potassium: 560, sodium: 68,
+          phosphorus: 240, selenium: 14.2, iodine: 28, copper: 0.18,
+          vitA: 42, vitC: 10.5, vitD: 0.3, vitE: 0.6, vitK: 3.2,
+          thiamine: 0.18, riboflavin: 0.36, niacin: 1.6, vitB6: 0.42, folate: 46, vitB12: 1.2, choline: 28
         },
         required: ['Greek Yogurt', 'Banana', 'Oats'],
         optional: [],
         steps: [
-          'Layer 1 cup of plain high-protein Greek yogurt in a bowl.',
-          'Top with toasted rolled oats and sliced fresh bananas.'
+          'Spoon 1 cup of Greek yogurt into a bowl.',
+          'Top with rolled oats and freshly sliced banana.'
         ]
       },
       {
         id: 'r_chicken_spinach_skillet',
         title: 'Pan-Seared Herb Chicken with Wilted Greens',
-        protein: 42,
-        calories: 390,
         prepTime: '15m',
         babySafe: false,
         texture: 'Lean solid protein',
-        safetyTip: 'High heme-iron and zinc for peak muscle and athletic recovery.',
-        micros: {
-          iron: 3.8,
-          calcium: 120,
-          vitC: 22,
-          vitA: 410,
-          zinc: 3.2,
-          potassium: 620
+        safetyTip: 'Bioavailable heme-iron, zinc, and selenium for muscular recovery and oxygenation.',
+        nutrients: {
+          protein: 42.5, calories: 395, carbs: 4.5, fiber: 2.8, fats: 12.5,
+          iron: 3.9, calcium: 125, magnesium: 78, zinc: 3.4, potassium: 640, sodium: 320,
+          phosphorus: 390, selenium: 34.5, iodine: 16, copper: 0.32,
+          vitA: 410, vitC: 22.5, vitD: 0.3, vitE: 2.8, vitK: 185,
+          thiamine: 0.22, riboflavin: 0.32, niacin: 14.5, vitB6: 1.15, folate: 88, vitB12: 1.4, choline: 115
         },
         required: ['Chicken Breast', 'Spinach'],
         optional: ['Tomatoes'],
         steps: [
-          'Slice chicken breast into medallions and season with salt and herbs.',
-          'Pan-sear in olive oil for 4–5 minutes per side until 165°F (74°C).',
-          'Toss fresh spinach in pan juices for 60 seconds until wilted.'
+          'Sear sliced chicken breast in olive oil for 4–5 minutes per side until 165°F.',
+          'Toss fresh baby spinach in pan juices for 60 seconds until wilted.'
         ]
       }
     ];
@@ -854,12 +908,16 @@
       { name: 'Tomatoes', category: 'vegetables' }
     ];
 
-    // --- 3. STATE INITIALIZATION ---
+    // --- 4. APP STATE INITIALIZATION ---
     let myPantry = [];
     let currentFilter = 'all';
+    let currentRecipeNutrientTab = 'all';
+    let activeRecipeViewing = null;
+    let dailyConsumedLog = []; // [{ id, title, nutrients }]
 
     function initApp() {
-      const savedProfiles = localStorage.getItem('nutripantry_profiles_v2');
+      // 1. Load profiles with full nutrients
+      const savedProfiles = localStorage.getItem('nutripantry_profiles_v3');
       if (savedProfiles) {
         try {
           profiles = JSON.parse(savedProfiles);
@@ -868,11 +926,13 @@
         }
       }
 
+      // 2. Load active profile
       const savedActiveKey = localStorage.getItem('nutripantry_active_profile');
       if (savedActiveKey && profiles[savedActiveKey]) {
         activeProfileKey = savedActiveKey;
       }
 
+      // 3. Load pantry
       const savedPantry = localStorage.getItem('nutripantry_inventory');
       if (savedPantry) {
         try {
@@ -893,13 +953,26 @@
         savePantry();
       }
 
+      // 4. Load today's consumed log
+      const savedLog = localStorage.getItem('nutripantry_daily_log');
+      if (savedLog) {
+        try {
+          dailyConsumedLog = JSON.parse(savedLog);
+        } catch(e) {
+          dailyConsumedLog = [];
+        }
+      }
+
       renderPresetPills();
       renderProfileCard();
       renderPantry();
       renderRecipes();
+      renderGuideGrids();
+      renderFullNutrientsTable();
+      updateDailyLogBadge();
     }
 
-    // --- 4. PROFILE SWITCHING & MICRONUTRIENT DISPLAY ---
+    // --- 5. PROFILE & CLINICAL BENCHMARK ENGINE ---
     function switchProfile(key) {
       if (!profiles[key]) return;
       activeProfileKey = key;
@@ -909,81 +982,90 @@
         const btn = document.getElementById(`btn-prof-${p}`);
         if (!btn) return;
         if (p === key) {
-          btn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap bg-white text-emerald-900 shadow-sm transition';
+          btn.className = 'px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap bg-white text-emerald-900 shadow-sm transition';
         } else {
-          btn.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition';
+          btn.className = 'px-2.5 py-1 rounded-xl text-xs font-semibold whitespace-nowrap bg-white/10 hover:bg-white/20 text-white transition';
         }
       });
 
       renderProfileCard();
       renderRecipes();
+      renderGuideGrids();
+      renderFullNutrientsTable();
+      updateDailyAccumulator();
     }
 
     function renderProfileCard() {
       const p = profiles[activeProfileKey];
-      document.getElementById('prof-name').innerText = p.name;
-      document.getElementById('prof-weight-badge').innerText = `${p.weight} kg`;
-      document.getElementById('prof-target-protein').innerText = `${p.proteinTarget}g`;
+      if (!p) return;
+
+      const nameEl = document.getElementById('prof-name');
+      if (nameEl) nameEl.innerText = p.name;
+
+      const weightBadgeEl = document.getElementById('prof-weight-badge');
+      if (weightBadgeEl) weightBadgeEl.innerText = `${p.weight} kg • ${p.activity || 'Moderate'} Activity`;
+
+      const targetProteinEl = document.getElementById('prof-target-protein');
+      if (targetProteinEl) targetProteinEl.innerText = `${p.proteinTarget}g`;
 
       const perMeal = Math.round(p.proteinTarget / 3);
-      document.getElementById('prof-meal-protein').innerText = `~${perMeal}g`;
-      document.getElementById('prof-cal').innerText = `~${p.calories}`;
-      document.getElementById('prof-tag').innerText = p.tag || `${p.baseFactor}g / kg`;
+      const mealProteinEl = document.getElementById('prof-meal-protein');
+      if (mealProteinEl) mealProteinEl.innerText = `~${perMeal}g / meal`;
 
-      // Render Micronutrients Summary Row on Profile Card
-      const microsContainer = document.getElementById('prof-micros-summary');
-      if (p.micros) {
-        microsContainer.innerHTML = `
-          <div class="bg-white/10 rounded-lg py-1 px-1">
-            <p class="text-[9px] text-emerald-100">Iron</p>
-            <p class="text-[11px] font-bold text-white">${p.micros.iron.val} ${p.micros.iron.unit}</p>
+      const calEl = document.getElementById('prof-cal');
+      if (calEl) calEl.innerText = `~${p.calories} kcal`;
+
+      const fiberEl = document.getElementById('prof-fiber');
+      if (fiberEl && p.nutrients) fiberEl.innerText = `${p.nutrients.fiber}g / day`;
+
+      const tagEl = document.getElementById('prof-tag');
+      if (tagEl) tagEl.innerText = p.tag || `${p.baseFactor}g / kg`;
+
+      // Render 4 key highlighted micronutrients on hero card
+      const microsSummary = document.getElementById('prof-micros-summary');
+      if (microsSummary && p.nutrients) {
+        const n = p.nutrients;
+        microsSummary.innerHTML = `
+          <div class="bg-white/10 rounded-xl py-1 px-1">
+            <p class="text-[9px] text-emerald-200">Iron</p>
+            <p class="text-[11px] font-black text-white">${n.iron ?? 0} mg</p>
           </div>
-          <div class="bg-white/10 rounded-lg py-1 px-1">
-            <p class="text-[9px] text-emerald-100">Calcium</p>
-            <p class="text-[11px] font-bold text-white">${p.micros.calcium.val} ${p.micros.calcium.unit}</p>
+          <div class="bg-white/10 rounded-xl py-1 px-1">
+            <p class="text-[9px] text-emerald-200">Calcium</p>
+            <p class="text-[11px] font-black text-white">${n.calcium ?? 0} mg</p>
           </div>
-          <div class="bg-white/10 rounded-lg py-1 px-1">
-            <p class="text-[9px] text-emerald-100">Vit C</p>
-            <p class="text-[11px] font-bold text-white">${p.micros.vitC.val} ${p.micros.vitC.unit}</p>
+          <div class="bg-white/10 rounded-xl py-1 px-1">
+            <p class="text-[9px] text-emerald-200">Zinc</p>
+            <p class="text-[11px] font-black text-white">${n.zinc ?? 0} mg</p>
           </div>
-          <div class="bg-white/10 rounded-lg py-1 px-1">
-            <p class="text-[9px] text-emerald-100">Zinc</p>
-            <p class="text-[11px] font-bold text-white">${p.micros.zinc.val} ${p.micros.zinc.unit}</p>
+          <div class="bg-white/10 rounded-xl py-1 px-1">
+            <p class="text-[9px] text-emerald-200">Vit C</p>
+            <p class="text-[11px] font-black text-white">${n.vitC ?? 0} mg</p>
           </div>
         `;
       }
 
-      // Infant/Toddler safety note display
+      // Feeding notes
       const noteEl = document.getElementById('baby-feeding-note');
-      const noteTextEl = document.getElementById('baby-note-text');
-      if (p.safetyNote && p.safetyNote.length > 0) {
-        noteTextEl.innerText = p.safetyNote;
-        noteEl.classList.remove('hidden');
-      } else {
-        noteEl.classList.add('hidden');
+      const noteText = document.getElementById('baby-note-text');
+      if (noteEl && noteText) {
+        if (p.safetyNote && p.safetyNote.length > 0) {
+          noteText.innerText = p.safetyNote;
+          noteEl.classList.remove('hidden');
+        } else {
+          noteEl.classList.add('hidden');
+        }
       }
     }
 
-    // --- 5. EDIT WEIGHT & MODAL ---
+    // --- 6. EDIT WEIGHT & GOALS MODAL ---
     function openEditWeightModal() {
       const p = profiles[activeProfileKey];
       document.getElementById('editModalTitle').innerText = `Edit: ${p.name}`;
       document.getElementById('input-prof-weight').value = p.weight;
       document.getElementById('input-prof-activity').value = p.activity || 'moderate';
-
       document.getElementById('weight-help-text').innerText =
-        `Standard baseline for ${p.name}: ~${p.weight} kg. Adjust to exact scale reading.`;
-
-      // Populate current micronutrients in the modal for review
-      const microsList = document.getElementById('edit-modal-micros-list');
-      if (p.micros) {
-        microsList.innerHTML = Object.entries(p.micros).map(([k, m]) => `
-          <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200">
-            <span class="text-slate-600 font-medium">${m.name}</span>
-            <span class="font-bold text-slate-800">${m.val} ${m.unit}</span>
-          </div>
-        `).join('');
-      }
+        `Standard baseline for ${p.name}: ~${p.weight} kg. Adjust to scale reading.`;
 
       previewRecalculatedProtein();
       openModal('editWeightModal');
@@ -1009,7 +1091,6 @@
       e.preventDefault();
       const weightVal = parseFloat(document.getElementById('input-prof-weight').value);
       const activityVal = document.getElementById('input-prof-activity').value;
-
       if (!weightVal || weightVal <= 0) return;
 
       const p = profiles[activeProfileKey];
@@ -1019,7 +1100,9 @@
       const mult = ACTIVITY_MULTIPLIERS[activityVal] || 1.0;
       const effectiveFactor = (p.baseFactor * mult);
       p.proteinTarget = Math.max(8, Math.round(p.weight * effectiveFactor));
+      p.nutrients.protein = p.proteinTarget;
 
+      // Adjust energy & scaled electrolytes based on updated mass
       if (activeProfileKey === 'infant') {
         p.calories = Math.round(p.weight * 82);
       } else if (activeProfileKey === 'toddler') {
@@ -1027,12 +1110,13 @@
       } else {
         p.calories = Math.round(p.weight * 30 * mult);
       }
-
-      p.tag = `${(Math.round(effectiveFactor * 100) / 100)}g / kg`;
+      p.nutrients.calories = p.calories;
 
       saveProfiles();
       renderProfileCard();
       renderRecipes();
+      renderGuideGrids();
+      renderFullNutrientsTable();
       closeModal('editWeightModal');
     }
 
@@ -1041,14 +1125,16 @@
       saveProfiles();
       renderProfileCard();
       renderRecipes();
+      renderGuideGrids();
+      renderFullNutrientsTable();
       closeModal('editWeightModal');
     }
 
     function saveProfiles() {
-      localStorage.setItem('nutripantry_profiles_v2', JSON.stringify(profiles));
+      localStorage.setItem('nutripantry_profiles_v3', JSON.stringify(profiles));
     }
 
-    // --- 6. PANTRY INVENTORY LOGIC ---
+    // --- 7. PANTRY INVENTORY LOGIC ---
     function renderPresetPills() {
       const container = document.getElementById('presetPillsContainer');
       container.innerHTML = PRESET_QUICK_ITEMS.map(item => {
@@ -1088,7 +1174,6 @@
       const name = document.getElementById('manualItemName').value.trim();
       const category = document.getElementById('manualItemCategory').value;
       const qty = document.getElementById('manualItemQty').value.trim() || 'In stock';
-
       if (!name) return;
 
       const existing = myPantry.find(p => p.name.toLowerCase() === name.toLowerCase());
@@ -1144,22 +1229,22 @@
           <div class="bg-white rounded-2xl p-6 text-center border border-slate-200">
             <i class="ph-duotone ph-basket text-4xl text-slate-300 mb-2"></i>
             <p class="text-sm font-semibold text-slate-700">Pantry is empty</p>
-            <p class="text-xs text-slate-400 mt-1">Tap the quick presets above or tap "+ Add Item" to feed what you have.</p>
+            <p class="text-xs text-slate-400 mt-1">Tap the quick presets above or tap "+ Add Custom" to track your items.</p>
           </div>
         `;
         return;
       }
 
-      const inStockItems = myPantry.filter(i => i.inStock);
-      const outOfStockItems = myPantry.filter(i => !i.inStock);
+      const inStock = myPantry.filter(i => i.inStock);
+      const outOfStock = myPantry.filter(i => !i.inStock);
 
       let html = '';
 
-      if (inStockItems.length > 0) {
+      if (inStock.length > 0) {
         html += `
           <div class="space-y-1.5">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">In Stock (${inStockItems.length})</p>
-            ${inStockItems.map(item => `
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">In Stock (${inStock.length})</p>
+            ${inStock.map(item => `
               <div class="bg-white rounded-xl p-3 border border-slate-200 flex items-center justify-between shadow-xs transition hover:border-slate-300">
                 <div class="flex items-center space-x-3 cursor-pointer flex-1" onclick="togglePantryStock('${item.id}')">
                   <div class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">
@@ -1179,11 +1264,11 @@
         `;
       }
 
-      if (outOfStockItems.length > 0) {
+      if (outOfStock.length > 0) {
         html += `
           <div class="space-y-1.5 pt-3">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Out of Stock (${outOfStockItems.length})</p>
-            ${outOfStockItems.map(item => `
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Out of Stock (${outOfStock.length})</p>
+            ${outOfStock.map(item => `
               <div class="bg-slate-100/70 rounded-xl p-3 border border-dashed border-slate-200 flex items-center justify-between opacity-75">
                 <div class="flex items-center space-x-3 cursor-pointer flex-1" onclick="togglePantryStock('${item.id}')">
                   <div class="w-6 h-6 rounded-md border border-slate-300 text-transparent flex items-center justify-center text-sm">
@@ -1206,10 +1291,10 @@
       container.innerHTML = html;
     }
 
-    // --- 7. RECIPE MATCHING & MICRONUTRIENT FILTERING ---
+    // --- 8. RECIPE MATCHING & CLINICAL NUTRIENT FILTERING ---
     function setRecipeFilter(filter) {
       currentFilter = filter;
-      ['all', 'ready', 'high-protein', 'iron-rich', 'calcium-rich', 'baby-safe'].forEach(f => {
+      ['all', 'ready', 'high-protein', 'iron-rich', 'calcium-rich', 'immune-boost', 'baby-safe'].forEach(f => {
         const btn = document.getElementById(`rf-${f}`);
         if (!btn) return;
         if (f === filter) {
@@ -1235,7 +1320,8 @@
         const availableRequired = r.required.filter(req => inStockSet.has(req.toLowerCase().trim()));
         const missing = r.required.filter(req => !inStockSet.has(req.toLowerCase().trim()));
         const matchPercent = requiredCount > 0 ? Math.round((availableRequired.length / requiredCount) * 100) : 0;
-        const mealProteinCoverage = Math.min(100, Math.round((r.protein / targetMealProtein) * 100));
+        const protein = r.nutrients.protein || 0;
+        const mealProteinCoverage = Math.min(100, Math.round((protein / targetMealProtein) * 100));
 
         return {
           ...r,
@@ -1249,11 +1335,13 @@
       if (currentFilter === 'ready') {
         filtered = filtered.filter(r => r.matchPercent === 100);
       } else if (currentFilter === 'high-protein') {
-        filtered = filtered.filter(r => r.protein >= 20);
+        filtered = filtered.filter(r => r.nutrients.protein >= 20);
       } else if (currentFilter === 'iron-rich') {
-        filtered = filtered.filter(r => r.micros && r.micros.iron >= 2.5);
+        filtered = filtered.filter(r => r.nutrients.iron >= 2.5);
       } else if (currentFilter === 'calcium-rich') {
-        filtered = filtered.filter(r => r.micros && r.micros.calcium >= 150);
+        filtered = filtered.filter(r => r.nutrients.calcium >= 150);
+      } else if (currentFilter === 'immune-boost') {
+        filtered = filtered.filter(r => r.nutrients.vitC >= 10 && r.nutrients.zinc >= 1.0);
       } else if (currentFilter === 'baby-safe') {
         filtered = filtered.filter(r => r.babySafe === true);
       }
@@ -1265,7 +1353,7 @@
           return b.matchPercent - a.matchPercent;
         });
       } else {
-        filtered.sort((a, b) => b.matchPercent - a.matchPercent || b.protein - a.protein);
+        filtered.sort((a, b) => b.matchPercent - a.matchPercent || b.nutrients.protein - a.nutrients.protein);
       }
 
       if (filtered.length === 0) {
@@ -1273,7 +1361,7 @@
           <div class="bg-white rounded-2xl p-6 text-center border border-slate-200">
             <i class="ph-duotone ph-magnifying-glass text-4xl text-slate-300 mb-2"></i>
             <p class="text-sm font-semibold text-slate-700">No matching recipes found</p>
-            <p class="text-xs text-slate-400 mt-1">Try switching filters or adding more items like Eggs, Lentils, or Greek Yogurt.</p>
+            <p class="text-xs text-slate-400 mt-1">Try switching filters or adding more items like Eggs, Lentils, or Oats.</p>
           </div>
         `;
         return;
@@ -1281,7 +1369,7 @@
 
       container.innerHTML = filtered.map(r => {
         const isReady = r.matchPercent === 100;
-        const m = r.micros || {};
+        const n = r.nutrients;
 
         return `
           <div onclick="openRecipeDetail('${r.id}')" class="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs hover:border-slate-300 transition cursor-pointer relative overflow-hidden">
@@ -1297,16 +1385,22 @@
                 </div>
                 <h3 class="font-bold text-slate-800 text-sm leading-snug">${r.title}</h3>
                 
-                <!-- Quick Micro Pills -->
-                <div class="flex flex-wrap gap-1.5 mt-2">
-                  <span class="text-[10px] font-medium bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100">
-                    🩸 ${m.iron || 0}mg Iron
+                <!-- Expanded Multi-Nutrient Badges -->
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <span class="text-[9px] font-bold bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded border border-rose-100">
+                    🩸 ${n.iron}mg Fe
                   </span>
-                  <span class="text-[10px] font-medium bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-100">
-                    🦴 ${m.calcium || 0}mg Ca
+                  <span class="text-[9px] font-bold bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-100">
+                    🦴 ${n.calcium}mg Ca
                   </span>
-                  <span class="text-[10px] font-medium bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">
-                    🍊 ${m.vitC || 0}mg Vit C
+                  <span class="text-[9px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">
+                    🍊 ${n.vitC}mg C
+                  </span>
+                  <span class="text-[9px] font-bold bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-100">
+                    🛡️ ${n.zinc}mg Zn
+                  </span>
+                  <span class="text-[9px] font-bold bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-100">
+                    🌾 ${n.fiber}g Fiber
                   </span>
                 </div>
 
@@ -1316,9 +1410,9 @@
                 }
               </div>
 
-              <!-- Protein Badge -->
+              <!-- Protein & Energy Badge -->
               <div class="text-right bg-slate-50 border border-slate-100 rounded-xl p-2 min-w-[76px]">
-                <p class="text-base font-extrabold text-slate-800 leading-none">${r.protein}g</p>
+                <p class="text-base font-extrabold text-slate-800 leading-none">${n.protein}g</p>
                 <p class="text-[9px] uppercase font-bold text-slate-400 mt-0.5">Protein</p>
                 <div class="mt-1 pt-1 border-t border-slate-200">
                   <p class="text-[10px] font-bold text-emerald-600">${r.mealProteinCoverage}%</p>
@@ -1331,61 +1425,27 @@
       }).join('');
     }
 
+    // --- 9. RECIPE DETAIL & COMPLETE 22+ NUTRIENT MODAL ---
     function openRecipeDetail(id) {
       const r = RECIPE_DATABASE.find(item => item.id === id);
       if (!r) return;
+      activeRecipeViewing = r;
 
       const activeProf = profiles[activeProfileKey];
       const targetMealProtein = Math.round(activeProf.proteinTarget / 3);
-      const coverage = Math.min(100, Math.round((r.protein / targetMealProtein) * 100));
+      const coverage = Math.min(100, Math.round((r.nutrients.protein / targetMealProtein) * 100));
 
       document.getElementById('modalRecipeTitle').innerText = r.title;
-      document.getElementById('modalRecipeProtein').innerText = `${r.protein}g`;
-      document.getElementById('modalMealPercentage').innerText = `${coverage}% of meal goal`;
-      document.getElementById('modalMealTargetLabel').innerText = `For ${activeProf.name}`;
+      document.getElementById('modalRecipeSub').innerText = `${r.prepTime} active cook • ~${r.nutrients.calories} kcal`;
+      document.getElementById('modalRecipeProtein').innerText = `${r.nutrients.protein}g`;
+      document.getElementById('modalRecipeCalories').innerText = r.nutrients.calories;
+      document.getElementById('modalRecipeFiber').innerText = `${r.nutrients.fiber}g`;
+      document.getElementById('modalRecipeCarbs').innerText = `${r.nutrients.carbs}g`;
 
-      // Tags
-      const tagsContainer = document.getElementById('modalRecipeTags');
-      tagsContainer.innerHTML = `
-        <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-semibold">${r.prepTime} prep</span>
-        <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-semibold">~${r.calories} kcal</span>
-        ${r.babySafe ? `<span class="bg-sky-100 text-sky-800 px-2 py-0.5 rounded-md font-bold">Baby / Toddler Safe</span>` : ''}
-      `;
+      // Render categorized nutrient grid
+      renderModalNutrientGrid();
 
-      // Render Detailed Micronutrient Breakdown Grid with Daily Percentages
-      const microsGrid = document.getElementById('modalMicronutrientsGrid');
-      const rM = r.micros || {};
-      const pM = activeProf.micros || {};
-
-      const microKeys = [
-        { key: 'iron', name: 'Iron', unit: 'mg', icon: '🩸' },
-        { key: 'calcium', name: 'Calcium', unit: 'mg', icon: '🦴' },
-        { key: 'vitC', name: 'Vitamin C', unit: 'mg', icon: '🍊' },
-        { key: 'vitA', name: 'Vitamin A', unit: 'mcg', icon: '🥕' },
-        { key: 'zinc', name: 'Zinc', unit: 'mg', icon: '🛡️' },
-        { key: 'potassium', name: 'Potassium', unit: 'mg', icon: '🍌' }
-      ];
-
-      microsGrid.innerHTML = microKeys.map(k => {
-        const amount = rM[k.key] || 0;
-        const target = pM[k.key]?.val || 1;
-        const pct = Math.min(100, Math.round((amount / target) * 100));
-
-        return `
-          <div class="bg-white p-2 rounded-lg border border-slate-200">
-            <div class="flex justify-between items-center text-[11px] mb-1">
-              <span class="font-medium text-slate-700">${k.icon} ${k.name}</span>
-              <span class="font-bold text-slate-900">${amount} ${k.unit}</span>
-            </div>
-            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-              <div class="bg-emerald-500 h-full rounded-full" style="width: ${pct}%"></div>
-            </div>
-            <p class="text-[9px] text-slate-400 mt-1 text-right">${pct}% of daily RDA</p>
-          </div>
-        `;
-      }).join('');
-
-      // Baby Texture Guidance
+      // Feeding guidance
       const textureBox = document.getElementById('modalFeedingTextureGuidance');
       const textureText = document.getElementById('modalFeedingTextureText');
       if (r.babySafe && (r.texture || r.safetyTip)) {
@@ -1395,12 +1455,11 @@
         textureBox.classList.add('hidden');
       }
 
-      // Ingredients with stock status
+      // Ingredients
       const inStockSet = new Set(
         myPantry.filter(i => i.inStock).map(i => i.name.toLowerCase().trim())
       );
-      const ingredientsList = document.getElementById('modalRecipeIngredients');
-      ingredientsList.innerHTML = r.required.map(req => {
+      document.getElementById('modalRecipeIngredients').innerHTML = r.required.map(req => {
         const have = inStockSet.has(req.toLowerCase().trim());
         return `
           <li class="flex items-center justify-between">
@@ -1413,13 +1472,211 @@
       }).join('');
 
       // Steps
-      const stepsList = document.getElementById('modalRecipeSteps');
-      stepsList.innerHTML = r.steps.map(s => `<li>${s}</li>`).join('');
+      document.getElementById('modalRecipeSteps').innerHTML = r.steps.map(s => `<li>${s}</li>`).join('');
 
       openModal('recipeDetailModal');
     }
 
-    // --- 8. AI RECIPE SYNTHESIZER ---
+    function switchRecipeNutrientTab(tab) {
+      currentRecipeNutrientTab = tab;
+      ['all', 'minerals', 'vitamins', 'macros'].forEach(t => {
+        const btn = document.getElementById(`rnt-${t}`);
+        if (!btn) return;
+        if (t === tab) {
+          btn.className = 'px-2.5 py-1 rounded-lg bg-slate-900 text-white font-semibold text-[11px]';
+        } else {
+          btn.className = 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium text-[11px]';
+        }
+      });
+      renderModalNutrientGrid();
+    }
+
+    function renderModalNutrientGrid() {
+      if (!activeRecipeViewing) return;
+      const grid = document.getElementById('modalDetailedNutrientGrid');
+      const rNutrients = activeRecipeViewing.nutrients || {};
+      const pNutrients = profiles[activeProfileKey].nutrients || {};
+
+      let keys = Object.keys(NUTRIENT_DEFINITIONS);
+      if (currentRecipeNutrientTab === 'minerals') {
+        keys = keys.filter(k => NUTRIENT_DEFINITIONS[k].cat === 'mineral');
+      } else if (currentRecipeNutrientTab === 'vitamins') {
+        keys = keys.filter(k => NUTRIENT_DEFINITIONS[k].cat === 'vitamin');
+      } else if (currentRecipeNutrientTab === 'macros') {
+        keys = keys.filter(k => NUTRIENT_DEFINITIONS[k].cat === 'macro');
+      }
+
+      grid.innerHTML = keys.map(k => {
+        const def = NUTRIENT_DEFINITIONS[k];
+        const val = rNutrients[k] || 0;
+        const target = pNutrients[k] || 1;
+        const pct = Math.min(100, Math.round((val / target) * 100));
+
+        return `
+          <div class="bg-white p-2 rounded-xl border border-slate-200">
+            <div class="flex justify-between items-center text-[11px] mb-1">
+              <span class="font-medium text-slate-700 truncate">${def.icon} ${def.name}</span>
+              <span class="font-extrabold text-slate-900 shrink-0">${val} ${def.unit}</span>
+            </div>
+            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-emerald-500 h-full rounded-full" style="width: ${pct}%"></div>
+            </div>
+            <p class="text-[9px] text-slate-400 mt-1 text-right font-medium">${pct}% of daily RDA</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- 10. DAILY CONSUMPTION ACCUMULATOR ENGINE ---
+    function logCurrentRecipeToDaily() {
+      if (!activeRecipeViewing) return;
+      dailyConsumedLog.push({
+        id: activeRecipeViewing.id,
+        title: activeRecipeViewing.title,
+        nutrients: { ...activeRecipeViewing.nutrients },
+        loggedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      localStorage.setItem('nutripantry_daily_log', JSON.stringify(dailyConsumedLog));
+      updateDailyLogBadge();
+      alert(`Logged "${activeRecipeViewing.title}" to today's nutrition!`);
+      closeModal('recipeDetailModal');
+    }
+
+    function updateDailyLogBadge() {
+      const badge = document.getElementById('headerLoggedBadge');
+      if (dailyConsumedLog.length > 0) {
+        badge.innerText = dailyConsumedLog.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+      updateDailyAccumulator();
+    }
+
+    function updateDailyAccumulator() {
+      const container = document.getElementById('dailyAccumulatorProgressBars');
+      const listContainer = document.getElementById('dailyLoggedList');
+      const countEl = document.getElementById('dailyLoggedCount');
+      if (!container || !listContainer) return;
+
+      countEl.innerText = dailyConsumedLog.length;
+
+      // Render meal chips
+      if (dailyConsumedLog.length === 0) {
+        listContainer.innerHTML = '<span class="text-xs text-slate-400 italic">No meals logged yet today. Tap "I Ate This" on any recipe.</span>';
+      } else {
+        listContainer.innerHTML = dailyConsumedLog.map((item, idx) => `
+          <span class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold px-2 py-1 rounded-lg flex items-center gap-1">
+            <span>${item.title}</span>
+            <button onclick="removeDailyLogItem(${idx})" class="text-emerald-500 hover:text-rose-600"><i class="ph-bold ph-x text-xs"></i></button>
+          </span>
+        `).join('');
+      }
+
+      // Aggregate all 22+ nutrients
+      const totals = {};
+      Object.keys(NUTRIENT_DEFINITIONS).forEach(k => totals[k] = 0);
+
+      dailyConsumedLog.forEach(entry => {
+        Object.keys(entry.nutrients || {}).forEach(k => {
+          if (totals[k] !== undefined) {
+            totals[k] += entry.nutrients[k];
+          }
+        });
+      });
+
+      // Render progress bars for active profile
+      const pNutrients = profiles[activeProfileKey].nutrients;
+      container.innerHTML = Object.keys(NUTRIENT_DEFINITIONS).map(k => {
+        const def = NUTRIENT_DEFINITIONS[k];
+        const consumed = Math.round(totals[k] * 10) / 10;
+        const target = pNutrients[k] || 1;
+        const pct = Math.min(100, Math.round((consumed / target) * 100));
+
+        let color = 'bg-emerald-500';
+        if (pct < 35) color = 'bg-amber-400';
+        if (pct >= 100) color = 'bg-emerald-600 progress-bar-glow';
+
+        return `
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="font-bold text-slate-800">${def.icon} ${def.name}</span>
+              <span class="font-extrabold text-slate-900">${consumed} / ${target} ${def.unit}</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+              <div class="${color} h-full rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+            </div>
+            <div class="flex justify-between items-center text-[10px] text-slate-400 mt-1">
+              <span>Category: ${def.cat}</span>
+              <span class="font-bold ${pct >= 100 ? 'text-emerald-600' : 'text-slate-500'}">${pct}% fulfilled</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function removeDailyLogItem(idx) {
+      dailyConsumedLog.splice(idx, 1);
+      localStorage.setItem('nutripantry_daily_log', JSON.stringify(dailyConsumedLog));
+      updateDailyLogBadge();
+    }
+
+    function clearDailyLog() {
+      if (confirm('Clear all logged meals for today?')) {
+        dailyConsumedLog = [];
+        localStorage.removeItem('nutripantry_daily_log');
+        updateDailyLogBadge();
+      }
+    }
+
+    // --- 11. GUIDE & FULL DRI REFERENCE TABLES ---
+    function renderGuideGrids() {
+      const p = profiles[activeProfileKey];
+      document.getElementById('guideProfileName').innerText = `Active: ${p.name} (${p.weight} kg)`;
+
+      const minGrid = document.getElementById('guideMineralsGrid');
+      const vitGrid = document.getElementById('guideVitaminsGrid');
+      if (!minGrid || !vitGrid) return;
+
+      const minKeys = Object.keys(NUTRIENT_DEFINITIONS).filter(k => NUTRIENT_DEFINITIONS[k].cat === 'mineral');
+      const vitKeys = Object.keys(NUTRIENT_DEFINITIONS).filter(k => NUTRIENT_DEFINITIONS[k].cat === 'vitamin');
+
+      minGrid.innerHTML = minKeys.map(k => `
+        <div class="bg-white p-2 rounded-lg border border-slate-200 flex justify-between items-center">
+          <span class="text-slate-600 font-medium">${NUTRIENT_DEFINITIONS[k].icon} ${NUTRIENT_DEFINITIONS[k].name}</span>
+          <span class="font-bold text-slate-900">${p.nutrients[k]} ${NUTRIENT_DEFINITIONS[k].unit}</span>
+        </div>
+      `).join('');
+
+      vitGrid.innerHTML = vitKeys.map(k => `
+        <div class="bg-white p-2 rounded-lg border border-slate-200 flex justify-between items-center">
+          <span class="text-slate-600 font-medium">${NUTRIENT_DEFINITIONS[k].icon} ${NUTRIENT_DEFINITIONS[k].name}</span>
+          <span class="font-bold text-slate-900">${p.nutrients[k]} ${NUTRIENT_DEFINITIONS[k].unit}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderFullNutrientsTable() {
+      const tbody = document.getElementById('fullNutrientsTableBody');
+      const sub = document.getElementById('tableModalSub');
+      const p = profiles[activeProfileKey];
+      if (!tbody) return;
+
+      sub.innerText = `Targets for ${p.name} (${p.weight} kg • ${p.activity})`;
+
+      tbody.innerHTML = Object.entries(NUTRIENT_DEFINITIONS).map(([k, def]) => {
+        const val = p.nutrients[k];
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-2.5 font-bold text-slate-800">${def.icon} ${def.name}</td>
+            <td class="py-2.5 capitalize text-slate-500 text-[11px]">${def.cat}</td>
+            <td class="py-2.5 text-right font-extrabold text-emerald-700">${val} ${def.unit}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // --- 12. AI RECIPE SYNTHESIZER WITH ALL 22+ NUTRIENTS ---
     async function synthesizeAIRecipe() {
       const inStockItems = myPantry.filter(i => i.inStock).map(i => i.name);
       if (inStockItems.length === 0) {
@@ -1433,7 +1690,7 @@
 
       if (apiKey) {
         try {
-          const prompt = `Given available ingredients: [${inStockItems.join(', ')}]. Generate ONE recipe targeting ${Math.round(activeProf.proteinTarget/3)}g protein for ${activeProf.name}. Output strictly JSON with keys: title, protein, calories, prepTime, babySafe (true/false), texture, safetyTip, micros (object with iron, calcium, vitC, vitA, zinc, potassium), required (array), steps (array).`;
+          const prompt = `Available ingredients: [${inStockItems.join(', ')}]. Generate ONE recipe targeting ${Math.round(activeProf.proteinTarget/3)}g protein for ${activeProf.name}. Output strictly JSON with keys: title, prepTime, babySafe (bool), texture, safetyTip, nutrients (object with all: protein, calories, carbs, fiber, fats, iron, calcium, magnesium, zinc, potassium, sodium, phosphorus, selenium, iodine, copper, vitA, vitC, vitD, vitE, vitK, thiamine, riboflavin, niacin, vitB6, folate, vitB12, choline), required (array), steps (array).`;
           
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
@@ -1453,7 +1710,7 @@
         }
       }
 
-      // Offline Instant Procedural Generator with estimated micronutrients
+      // Offline Procedural Generator with complete calculated nutritional profile
       const primaryItem = inStockItems[0];
       const secondaryItem = inStockItems.length > 1 ? inStockItems[1] : 'Fresh Greens';
       const targetProtein = Math.round(activeProf.proteinTarget / 3);
@@ -1461,19 +1718,38 @@
       const generated = {
         id: 'ai_' + Date.now(),
         title: `Chef's ${primaryItem} & ${secondaryItem} Power Sauté`,
-        protein: Math.max(12, targetProtein),
-        calories: 310,
         prepTime: '12m',
         babySafe: activeProfileKey === 'infant' || activeProfileKey === 'toddler',
         texture: activeProfileKey === 'infant' ? 'Pureed or fork mashed' : 'Soft tender bites',
         safetyTip: 'Season to taste. For infant feeding, avoid added salt or whole spices.',
-        micros: {
-          iron: 2.5,
-          calcium: 110,
-          vitC: 15,
-          vitA: 310,
-          zinc: 1.6,
-          potassium: 380
+        nutrients: {
+          protein: Math.max(14, targetProtein),
+          calories: 310,
+          carbs: 28,
+          fiber: 5.5,
+          fats: 9.8,
+          iron: 3.2,
+          calcium: 140,
+          magnesium: 62,
+          zinc: 1.8,
+          potassium: 490,
+          sodium: 140,
+          phosphorus: 210,
+          selenium: 18,
+          iodine: 12,
+          copper: 0.28,
+          vitA: 340,
+          vitC: 18.5,
+          vitD: 0.3,
+          vitE: 1.8,
+          vitK: 110,
+          thiamine: 0.22,
+          riboflavin: 0.24,
+          niacin: 2.8,
+          vitB6: 0.45,
+          folate: 115,
+          vitB12: 0.8,
+          choline: 65
         },
         required: [primaryItem, secondaryItem],
         optional: [],
@@ -1490,7 +1766,7 @@
       openRecipeDetail(generated.id);
     }
 
-    // --- 9. TAB NAVIGATION & MODAL HELPERS ---
+    // --- 13. TAB NAVIGATION & MODAL HELPERS ---
     function switchTab(tabId) {
       ['pantry', 'recipes', 'guide'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
@@ -1499,10 +1775,10 @@
 
         if (t === tabId) {
           view.classList.remove('hidden');
-          nav.className = 'flex flex-col items-center justify-center py-1 text-emerald-600';
+          nav.className = 'flex flex-col items-center justify-center py-1 text-emerald-600 font-bold';
         } else {
           view.classList.add('hidden');
-          nav.className = 'flex flex-col items-center justify-center py-1 text-slate-400 hover:text-slate-600';
+          nav.className = 'flex flex-col items-center justify-center py-1 text-slate-400 hover:text-slate-600 font-semibold';
         }
       });
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1517,10 +1793,11 @@
     }
 
     function clearAllData() {
-      if (confirm('Reset your inventory and custom weights back to default?')) {
+      if (confirm('Reset your inventory, daily logs, and custom weights back to default?')) {
         localStorage.clear();
         profiles = JSON.parse(JSON.stringify(DEFAULT_PROFILES));
         activeProfileKey = 'male';
+        dailyConsumedLog = [];
         initApp();
         closeModal('settingsModal');
       }
